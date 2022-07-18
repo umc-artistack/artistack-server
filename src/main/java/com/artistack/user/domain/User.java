@@ -12,6 +12,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(name = "`user`")
 public class User extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +26,7 @@ public class User extends BaseTimeEntity {
 
     private Integer instrumentId;
 
-    @Enumerated(EnumType.STRING)
+//    @Enumerated(EnumType.STRING)
     @NotNull
     private String providerType; // TODO: String -> ProviderType로 타입 변경
 
