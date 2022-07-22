@@ -19,12 +19,18 @@ repositories {
 }
 
 dependencies {
+	// basic
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// lombok
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'mysql:mysql-connector-java'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// test code
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	// s3
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
 	/*--------- 메이슨 ---------*/
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
