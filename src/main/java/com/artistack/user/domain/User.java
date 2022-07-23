@@ -1,17 +1,16 @@
 package com.artistack.user.domain;
 
 import com.artistack.config.BaseTimeEntity;
-import com.artistack.instrument.domain.Instrument;
 import com.artistack.oauth.constant.ProviderType;
 import com.artistack.user.constant.Role;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnTransformer;
 
 @Entity
 @Getter
@@ -28,10 +27,17 @@ public class User extends BaseTimeEntity {
     private String artistackId;
 
     @Column(nullable = true)
+    @Setter
     private String nickname;
 
-    @Column(nullable = true, unique = true, length = 255)
+    @Column(nullable = true, length = 255)
+    @ColumnTransformer(write="trim(?)")
+    @Setter
     private String description;
+
+    @Column(nullable = true)
+    @Setter
+    private String profileImgUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
@@ -39,13 +45,15 @@ public class User extends BaseTimeEntity {
 
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
+    @Setter
     private Role role = Role.USER;
 
     @Builder
-    public User(String artistackId, String nickname, String description, ProviderType providerType) {
+    public User(String artistackId, String nickname, String description, String profileImgUrl, ProviderType providerType) {
         this.artistackId = artistackId;
         this.nickname = nickname;
         this.description = description;
+        this.profileImgUrl = profileImgUrl;
         this.providerType = providerType;
     }
 }

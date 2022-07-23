@@ -2,7 +2,6 @@ package com.artistack.user.dto;
 
 import com.artistack.instrument.domain.UserInstrument;
 import com.artistack.instrument.dto.InstrumentDto;
-import com.artistack.instrument.repository.InstrumentRepository;
 import com.artistack.instrument.repository.UserInstrumentRepository;
 import com.artistack.oauth.constant.ProviderType;
 import com.artistack.user.constant.Role;
@@ -23,6 +22,7 @@ public class UserDto {
     private String artistackId;
     private String nickname;
     private String description;
+    private String profileImgUrl;
     private List<InstrumentDto> instruments;
     private ProviderType providerType;
     private Role role;
@@ -37,6 +37,7 @@ public class UserDto {
             .artistackId(user.getArtistackId())
             .nickname(user.getNickname())
             .description(user.getDescription())
+            .profileImgUrl(user.getProfileImgUrl())
             .instruments(Optional.ofNullable(userInstrumentRepository).map(
                 e -> e.findByUserId(user.getId()).stream().map(UserInstrument::getInstrument)
                     .map(InstrumentDto::response).collect(Collectors.toList())).orElse(null))
@@ -54,7 +55,13 @@ public class UserDto {
     }
 
     public User toEntity() {
-        return User.builder().artistackId(artistackId).description(description).providerType(providerType).build();
+        return User.builder().
+            artistackId(artistackId).
+            nickname(nickname).
+            description(description).
+            profileImgUrl(profileImgUrl)
+            .providerType(providerType).
+            build();
     }
 }
 

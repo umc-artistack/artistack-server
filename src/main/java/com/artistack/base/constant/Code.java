@@ -36,6 +36,8 @@ public enum Code {
     INTERNAL_ERROR(20000, HttpStatus.INTERNAL_SERVER_ERROR, "Internal error"),
     DATA_ACCESS_ERROR(20001, HttpStatus.INTERNAL_SERVER_ERROR, "Data access error"),
     KAKAO_SERVER_ERROR(23001, HttpStatus.INTERNAL_SERVER_ERROR , "Kakao server error"),
+    S3_UPLOAD_ERROR(23002, HttpStatus.INTERNAL_SERVER_ERROR, "S3 upload error"),
+
 
 
     UNAUTHORIZED(40000, HttpStatus.UNAUTHORIZED, "User unauthorized"),
