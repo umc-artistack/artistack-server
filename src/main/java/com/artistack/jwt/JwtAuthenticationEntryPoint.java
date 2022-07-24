@@ -18,7 +18,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setHeader("content-type", "application/json");
         response.setStatus(401);
 
-        Code errorcode = Code.EXPIRED_ACCESS_TOKEN;
+        Code errorcode = Code.EXPIRED_JWT;
         JSONObject params = new JSONObject();
         params.put("success", false);
         params.put("code", errorcode.getCode().toString());

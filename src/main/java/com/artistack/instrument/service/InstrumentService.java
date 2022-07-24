@@ -57,7 +57,7 @@ public class InstrumentService {
             for (InstrumentDto instrumentDto : instrumentDtos) {
                 Instrument instrument = instrumentRepository.findById(instrumentDto.getId())
                     .orElseThrow(
-                        () -> new GeneralException(Code.INSTRUMENT_NOT_VALID, instrumentDto.getId().toString()));
+                        () -> new GeneralException(Code.INSTRUMENT_ID_NOT_VALID, instrumentDto.getId().toString()));
                 userInstrumentRepository.save(UserInstrument.builder().user(user).instrument(instrument).build());
             }
         }
