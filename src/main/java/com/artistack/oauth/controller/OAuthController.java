@@ -10,6 +10,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +37,7 @@ public class OAuthController {
         return DataResponseDto.of(Code.NOT_REGISTERED, signInResult);
     }
 
-    @GetMapping("/signUp")
+    @PostMapping("/signUp")
     public DataResponseDto<Object> signUp(
         @RequestHeader("Authorization") String providerAccessToken,
         @RequestBody UserDto userDto
