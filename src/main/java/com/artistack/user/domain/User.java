@@ -1,59 +1,44 @@
 package com.artistack.user.domain;
 
 import com.artistack.config.BaseTimeEntity;
-import com.artistack.oauth.constant.ProviderType;
-import com.artistack.user.constant.Role;
+import com.sun.istack.NotNull;
 import lombok.Builder;
+import lombok.Generated;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import lombok.Setter;
-import lombok.ToString;
-import org.hibernate.annotations.ColumnTransformer;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @Table(name = "`user`")
-@ToString(of = {"id", "artistackId", "description", "providerType"})
 public class User extends BaseTimeEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = true, unique = true)
+    @NotNull
     private String artistackId;
 
-    @Column(nullable = true)
-    @Setter
-    private String nickname;
-
-    @Column(nullable = true, length = 255)
-    @ColumnTransformer(write="trim(?)")
-    @Setter
+    @NotNull
     private String description;
 
-    @Column(nullable = true)
-    @Setter
-    private String profileImgUrl;
+    private Integer instrumentId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
-    private ProviderType providerType;
+//    @Enumerated(EnumType.STRING)
+    @NotNull
+    private String providerType; // TODO: String -> ProviderType로 타입 변경
 
-    @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
-    @Setter
-    private Role role = Role.USER;
+    @NotNull
+    private String status;
 
     @Builder
-    public User(String artistackId, String nickname, String description, String profileImgUrl, ProviderType providerType) {
+    public User(String artistackId, String description, Integer instrumentId, String providerType, String status) {
         this.artistackId = artistackId;
-        this.nickname = nickname;
         this.description = description;
-        this.profileImgUrl = profileImgUrl;
+        this.instrumentId = instrumentId;
         this.providerType = providerType;
+        this.status = status;
     }
 }
