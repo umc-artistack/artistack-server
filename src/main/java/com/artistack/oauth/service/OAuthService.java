@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -34,11 +36,14 @@ public class OAuthService {
     private final KakaoAccountRepository kakaoAccountRepository;
     private final UserRepository userRepository;
     private final InstrumentService instrumentService;
-    private final UserService userService;
     private final JwtService jwtService;
 
     @Value("${security.oauth2.provider.kakao.user-info-uri}")
-    private String KAKAO_USER_INFO_URL;
+    private String KAKAO_USER_INFO_URI;
+    @Value("${security.oauth2.provider.kakao.unlink-uri}")
+    private String KAKAO_UNLINK_URI;
+    @Value("${security.oauth2.provider.kakao.admin-key}")
+    private String KAKAO_ADMIN_KEY;
 
     /**
      * 주어진 provider type으로 회원을 식별하여 로그인을 진행합니다.
@@ -60,6 +65,7 @@ public class OAuthService {
         return jwtService.issueJwt(user.get());
     }
 
+
     /**
      * 회원가입을 진행합니다.
      *
@@ -78,8 +84,7 @@ public class OAuthService {
             }
         }
 
-        userService.validateRequest(userDto);
-        User user = userRepository.save(userDto.toEntity());
+        User user = userRepository.save(userDto.toEntity(userRepository));
 
         // provider repository에 각기 저장
         if (userDto.getProviderType().equals(ProviderType.KAKAO)) {
@@ -101,7 +106,7 @@ public class OAuthService {
         ResponseEntity<KakaoAccountDto> response;
         try {
             response = new RestTemplate().exchange(
-                KAKAO_USER_INFO_URL,
+                KAKAO_USER_INFO_URI,
                 HttpMethod.GET,
                 new HttpEntity<>(null, headers),
                 KakaoAccountDto.class
@@ -111,5 +116,34 @@ public class OAuthService {
             throw new GeneralException(Code.KAKAO_SERVER_ERROR, e);
         }
         return response.getBody();
+    }
+
+
+    public void unlinkKakaoAccount(Long userId) {
+        KakaoAccount kakaoAccount = kakaoAccountRepository.findByUserId(userId)
+            .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "Fail to unlink kakao account"));
+
+        HttpHeaders headers = new HttpHeaders();
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+
+        headers.set("Authorization", "KakaoAK " + KAKAO_ADMIN_KEY);
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        params.add("target_id_type", "user_id");
+        params.add("target_id", kakaoAccount.getId());
+
+        try {
+            new RestTemplate().exchange(
+                KAKAO_UNLINK_URI,
+                HttpMethod.POST,
+                new HttpEntity<>(params, headers),
+                String.class
+            );
+        } catch (RestClientException e) {
+            log.trace("Fail to unlink kakao account", e);
+            throw new GeneralException(Code.KAKAO_SERVER_ERROR, "Fail to unlink kakao account", e);
+        }
+
+        kakaoAccountRepository.deleteByUserId(userId);
     }
 }
