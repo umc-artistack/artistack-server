@@ -2,6 +2,7 @@ package com.artistack.controller;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import com.artistack.base.constant.Code;
@@ -9,6 +10,7 @@ import com.artistack.instrument.domain.Instrument;
 import com.artistack.instrument.domain.UserInstrument;
 import com.artistack.instrument.repository.UserInstrumentRepository;
 import com.artistack.jwt.dto.JwtDto;
+import com.artistack.oauth.dto.KakaoAccountDto;
 import com.artistack.oauth.repository.KakaoAccountRepository;
 import com.artistack.user.domain.User;
 import com.artistack.user.repository.UserRepository;
@@ -38,9 +40,20 @@ class OAuthControllerTest extends BaseControllerTest {
     String kakaoToken = "",
         appleToken = "";
 
-
-    HashMap<String, Object> registerBody;
     List<Long> instrumentIds = List.of(1L, 3L);
+    HashMap<String, Object> registerBody, testUserRegisterBody = new HashMap<>() {{
+        put("artistackId", "testIdID");
+        put("nickname", "nnnnocknmae");
+        put("description", "안녕핫요 안녕하세요오오오옹 !!?.dwekd123 zzz");
+        put("providerType", "TEST");
+        put("instruments", new ArrayList<>() {{
+            instrumentIds.forEach(id ->
+                add(new HashMap<>() {{
+                    put("id", id);
+                }})
+            );
+        }});
+    }};;
 
     @BeforeEach
     void setUp() {
@@ -90,7 +103,7 @@ class OAuthControllerTest extends BaseControllerTest {
     }
 
     JwtDto signUp(HashMap<String, Object> body, int code) throws Exception {
-        MvcResult res = mockMvc.perform(get("/oauth/signUp")
+        MvcResult res = mockMvc.perform(post("/oauth/signUp")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + (body.get("providerType").equals("KAKAO") ? kakaoToken : ""))
                 .content(objectMapper.writeValueAsString(body))
@@ -106,16 +119,23 @@ class OAuthControllerTest extends BaseControllerTest {
     @Test
     @DisplayName("가입 안한 상태에서 카카오로 로그인")
     void signInWithKakaoNotRegisteredTest() throws Exception {
-        signInWithKakao(Code.NOT_REGISTERED.getCode());
+        KakaoAccountDto res = (KakaoAccountDto) signInWithKakao(Code.NOT_REGISTERED.getCode());
+        then(res.getId()).isNotNull();
     }
 
-    void signInWithKakao(int code) throws Exception {
-        mockMvc.perform(get("/oauth/signIn?providerType=KAKAO")
+    Object signInWithKakao(int code) throws Exception {
+        MvcResult res = mockMvc.perform(get("/oauth/signIn?providerType=KAKAO")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + kakaoToken)
             )
             .andExpect(jsonPath("$.code").value(code))
+            .andReturn()
         ;
+
+        Map map = gson.fromJson(res.getResponse().getContentAsString(), Map.class);
+        if(code == Code.OK.getCode())
+            return gson.fromJson(gson.toJsonTree(map.get("data")), JwtDto.class);
+        return gson.fromJson(gson.toJsonTree(map.get("data")), KakaoAccountDto.class);
     }
 
     @EnabledIf("iskakaoTokenPresent")
@@ -139,7 +159,11 @@ class OAuthControllerTest extends BaseControllerTest {
     @DisplayName("가입 한 상태에서 카카오로 로그인")
     void signInWithKakaoSuccessTest() throws Exception {
         signUpWithKakaoTest();
-        signInWithKakao(Code.OK.getCode());
+        JwtDto res = (JwtDto) signInWithKakao(Code.OK.getCode());
+        then(res.getAccessToken()).isNotNull();
+        then(res.getRefreshToken()).isNotNull();
+        then(res.getGrantType()).isEqualTo("bearer");
+        then(res.getAccessTokenExpiresIn()).isNotNull();
     }
 
 
