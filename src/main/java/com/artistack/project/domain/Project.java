@@ -41,8 +41,11 @@ public class Project extends BaseTimeEntity {
     @NotNull
     private Long prevProjectId;
 
+    @NotNull
+    private Long userId;
+
     @Builder
-    public Project(String description, Boolean isStackable, String scope, String videoUrl, Integer bpm, String codeFlow, Integer instrumentId, Long prevProjectId) {
+    public Project(String description, Boolean isStackable, String scope, String videoUrl, Integer bpm, String codeFlow, Integer instrumentId, Long prevProjectId, Long userId) {
         this.description = description;
         this.isStackable = isStackable;
         this.scope = scope;
@@ -51,5 +54,6 @@ public class Project extends BaseTimeEntity {
         this.codeFlow = codeFlow;
         this.instrumentId = instrumentId;
         this.prevProjectId = prevProjectId;
+        this.userId = userId;
     }
 }
