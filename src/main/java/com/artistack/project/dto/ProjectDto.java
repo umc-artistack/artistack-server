@@ -10,13 +10,13 @@ import lombok.Data;
 public class ProjectDto {
 
     private Long id;
+    private String videoUrl;
+    private String title;
     private String description;
     private Boolean isStackable;
     private String scope;
-    private String videoUrl;
-    private Integer bpm;
     private String codeFlow;
-    private Integer instrumentId;
+    private Integer bpm;
     private Long prevProjectId;
     private Long userId;
 
@@ -31,7 +31,6 @@ public class ProjectDto {
                 .videoUrl(project.getVideoUrl())
                 .bpm(project.getBpm())
                 .codeFlow(project.getCodeFlow())
-                .instrumentId(project.getInstrumentId())
                 .prevProjectId(project.getPrevProjectId())
                 .userId(project.getUserId())
                 .build();
@@ -47,7 +46,6 @@ public class ProjectDto {
                 .videoUrl(project.getVideoUrl())
                 .bpm(project.getBpm())
                 .codeFlow(project.getCodeFlow())
-                .instrumentId(project.getInstrumentId())
                 .prevProjectId(project.getPrevProjectId())
                 .userId(project.getUserId())
                 .build();
