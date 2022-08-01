@@ -46,7 +46,8 @@ public class Project extends BaseTimeEntity {
     private User user;
 
     @Builder
-    public Project(String videoUrl, String title, String description, Boolean isStackable, String scope, String codeFlow, Integer bpm, Integer viewCount, Long prevProjectId, User user) {
+    public Project(Long id, String videoUrl, String title, String description, Boolean isStackable, String scope, String codeFlow, Integer bpm, Integer viewCount, Long prevProjectId, User user) {
+        this.id = id;
         this.videoUrl = videoUrl;
         this.title = title;
         this.description = description;
@@ -54,7 +55,6 @@ public class Project extends BaseTimeEntity {
         this.scope = scope;
         this.codeFlow = codeFlow;
         this.bpm = bpm;
-        this.prevProjectId = prevProjectId;
         this.viewCount = viewCount;
         this.prevProjectId = prevProjectId;
         this.user = user;
