@@ -65,6 +65,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
             .and()
             .apply(new JwtSecurityConfig(tokenProvider));
+
+        http.headers().frameOptions().disable();
     }
 
     @Bean
