@@ -1,4 +1,9 @@
 package com.artistack.project.service;
+
+import com.artistack.instrument.domain.ProjectInstrument;
+import com.artistack.instrument.domain.UserInstrument;
+import com.artistack.instrument.dto.InstrumentDto;
+import com.artistack.instrument.repository.ProjectInstrumentRepository;
 import com.artistack.project.domain.Project;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.repository.ProjectRepository;
@@ -9,8 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.artistack.base.GeneralException;
 import com.artistack.base.constant.Code;
+
 import java.io.IOException;
 import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
@@ -23,6 +30,7 @@ import java.util.stream.Collectors;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+    private final ProjectInstrumentRepository projectInstrumentRepository;
     private final S3UploaderService s3UploaderService;
 
     // 초기 설정
@@ -30,8 +38,8 @@ public class ProjectService {
 //    public void initialize() {
 //        List<String> videoUrls = List.of("https://...", "https://...", "https://...", "https://...", "https://...",
 //                "https://...", "https://...", "https://...");
-//        List<String> titles = List.of("제목1", "제목2", "제목3", "제목4", "제목5", "제목6", "제목7", "제목8");
-//        List<String> descriptions = List.of("설명1", "설명2", "설명3", "설명4", "설명5", "설명6", "설명7", "설명8");
+//        List<String> titles = List.of("제목1", "제목2", "제목3", "제목4", "제목5", "제목6", "제목7");
+//        List<String> descriptions = List.of("설명1", "설명2", "설명3", "설명4", "설명5", "설명6", "설명7");
 //
 //        for (int i = 1; i < videoUrls.size(); i++) {
 //            projectRepository.save(
@@ -48,9 +56,14 @@ public class ProjectService {
 
     // 프로젝트 정보 조회
     public List<ProjectDto> getById(Long projectId) {
-        log.debug("dddddddddddddd"+projectId.toString());
-        log.debug(projectRepository.findById(projectId).stream().map(ProjectDto::getProject).collect(Collectors.toList()).toString()    );
-        return projectRepository.findById(projectId).stream().map(ProjectDto::getProject).collect(Collectors.toList());
+
+        log.debug("ddddddd"+projectId);
+        log.debug("ddddddd"+projectInstrumentRepository.findByProjectId(projectId).toString());
+        return projectRepository.findById(projectId).stream().map(project -> ProjectDto.getProject(project, projectInstrumentRepository))
+                .collect(Collectors.toList());
+//        return projectInstrumentRepository.findByProjectId(projectId).stream().map(ProjectInstrument::getInstrument)
+//                .map(InstrumentDto::response).collect(Collectors.toList());
+
     }
 
 
