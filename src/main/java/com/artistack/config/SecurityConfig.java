@@ -53,6 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
             .authorizeRequests()
             .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+            .antMatchers("/**").permitAll() // 개발을 위한 모든 uri 임시 허가
             .antMatchers("/oauth/**").permitAll()
             .antMatchers("/user/checkDuplicate").permitAll()
             .antMatchers("/instruments").permitAll()
@@ -64,6 +65,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
             .and()
             .apply(new JwtSecurityConfig(tokenProvider));
+
+        http.headers().frameOptions().disable();
     }
 
     @Bean
