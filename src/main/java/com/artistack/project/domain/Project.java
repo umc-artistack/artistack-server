@@ -1,15 +1,13 @@
 package com.artistack.project.domain;
 
 import com.artistack.config.BaseTimeEntity;
+import com.artistack.user.domain.User;
 import com.sun.istack.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Getter
@@ -38,16 +36,17 @@ public class Project extends BaseTimeEntity {
 
     private Integer bpm;
 
-    private Integer veiwCount;
+    private Integer viewCount;
 
     @NotNull
     private Long prevProjectId;
 
-    @NotNull
-    private Long userId;
+    @ManyToOne
+    @JoinColumn
+    private User user;
 
     @Builder
-    public Project(String videoUrl, String title, String description, Boolean isStackable, String scope, String codeFlow, Integer bpm, Long prevProjectId, Long userId) {
+    public Project(String videoUrl, String title, String description, Boolean isStackable, String scope, String codeFlow, Integer bpm, Integer viewCount, Long prevProjectId, User user) {
         this.videoUrl = videoUrl;
         this.title = title;
         this.description = description;
@@ -56,6 +55,8 @@ public class Project extends BaseTimeEntity {
         this.codeFlow = codeFlow;
         this.bpm = bpm;
         this.prevProjectId = prevProjectId;
-        this.userId = userId;
+        this.viewCount = viewCount;
+        this.prevProjectId = prevProjectId;
+        this.user = user;
     }
 }

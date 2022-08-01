@@ -1,12 +1,17 @@
 package com.artistack.project.dto;
 import com.artistack.project.domain.Project;
+import com.artistack.user.domain.User;
+import com.artistack.user.dto.UserDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Getter
 public class ProjectDto {
 
     private Long id;
@@ -17,8 +22,9 @@ public class ProjectDto {
     private String scope;
     private String codeFlow;
     private Integer bpm;
+    private Integer viewCount;
     private Long prevProjectId;
-    private Long userId;
+    private User user;
 
 
     public static ProjectDto response(Project project) {
@@ -31,8 +37,9 @@ public class ProjectDto {
                 .videoUrl(project.getVideoUrl())
                 .bpm(project.getBpm())
                 .codeFlow(project.getCodeFlow())
+                .viewCount(project.getViewCount())
                 .prevProjectId(project.getPrevProjectId())
-                .userId(project.getUserId())
+                .user(project.getUser())
                 .build();
     }
 
@@ -46,8 +53,23 @@ public class ProjectDto {
                 .videoUrl(project.getVideoUrl())
                 .bpm(project.getBpm())
                 .codeFlow(project.getCodeFlow())
+                .viewCount(project.getViewCount())
                 .prevProjectId(project.getPrevProjectId())
-                .userId(project.getUserId())
+                .user(project.getUser())
+                .build();
+    }
+
+    // ProjectDto -> Project
+    // Request 정보 + videoUrl과 prevProjectId가 추가적으로 필요
+    public Project toEntity(String videoUrl, Long prevProjectId) {
+        return Project.builder()
+                .videoUrl(videoUrl)
+                .description(description)
+                .bpm(bpm)
+                .codeFlow(codeFlow)
+                .scope(scope)
+                .isStackable(isStackable)
+                .prevProjectId(prevProjectId)
                 .build();
     }
 }
