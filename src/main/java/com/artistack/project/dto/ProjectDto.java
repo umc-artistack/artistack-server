@@ -1,6 +1,9 @@
 package com.artistack.project.dto;
 
+import com.artistack.instrument.domain.Instrument;
+import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.project.domain.Project;
+import com.artistack.user.domain.User;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,40 +14,41 @@ public class ProjectDto {
     private String title;
     private String description;
 
-    private Integer bpm;
+    private String bpm;
 
     private String codeFlow;
 
-    private Integer instrumentId;
+    private Integer instrument;
 
     private Integer scope;
 
     private Boolean isStackable;
 
-    @Builder
-    public ProjectDto(String title, String description, Integer bpm, String codeFlow, Integer instrumentId,
+    public ProjectDto(String title, String description, String bpm, String codeFlow, Integer instrument,
         Integer scope, Boolean isStackable) {
         this.title = title;
         this.description = description;
         this.bpm = bpm;
         this.codeFlow = codeFlow;
-        this.instrumentId = instrumentId;
+        this.instrument = instrument;
         this.scope = scope;
         this.isStackable = isStackable;
     }
 
     // ProjectDto -> Project
-    // Request 정보 + videoUrl과 prevProjectId가 추가적으로 필요
-    public Project toEntity(String videoUrl, Long prevProjectId) {
+    // (+) videoUrl, prevProjectId, User 추가적으로 필요
+    public Project toEntity(String videoUrl, Long prevProjectId, InstrumentDto instrumentDto, User user) {
         return Project.builder()
                 .videoUrl(videoUrl)
+                .title(title)
                 .description(description)
                 .bpm(bpm)
                 .codeFlow(codeFlow)
-                .instrumentId(instrumentId)
+                .instrument(instrumentDto.toEntity())
                 .scope(scope)
                 .isStackable(isStackable)
                 .prevProjectId(prevProjectId)
+                .user(user)
                 .build();
     }
 }

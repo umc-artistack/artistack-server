@@ -5,10 +5,9 @@ import com.artistack.base.constant.Code;
 import com.artistack.base.dto.DataResponseDto;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.service.ProjectService;
+import com.artistack.user.dto.UserDto;
 import java.util.List;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,8 +33,6 @@ public class ProjectController {
         @RequestPart(value = "video") MultipartFile video,
         @RequestPart(value = "dto") ProjectDto projectDto
         ) {
-
-        // TODO: 유저 인덱스 저장하는 로직 만들기
 
         // validation: 비디오 파일이 비어 있을 경우
         if (video.isEmpty()) {
