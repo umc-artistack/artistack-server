@@ -1,13 +1,9 @@
 package com.artistack.project.service;
 
-import com.artistack.instrument.domain.ProjectInstrument;
-import com.artistack.instrument.domain.UserInstrument;
-import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.ProjectInstrumentRepository;
 import com.artistack.project.domain.Project;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.repository.ProjectRepository;
-import com.artistack.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +16,6 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,7 +28,7 @@ public class ProjectService {
     private final ProjectInstrumentRepository projectInstrumentRepository;
     private final S3UploaderService s3UploaderService;
 
-    // 초기 설정
+    // 초기 값 설정
 //    @PostConstruct
 //    public void initialize() {
 //        List<String> videoUrls = List.of("https://...", "https://...", "https://...", "https://...", "https://...",
@@ -56,14 +51,8 @@ public class ProjectService {
 
     // 프로젝트 정보 조회
     public List<ProjectDto> getById(Long projectId) {
-
-        log.debug("ddddddd"+projectId);
-        log.debug("ddddddd"+projectInstrumentRepository.findByProjectId(projectId).toString());
         return projectRepository.findById(projectId).stream().map(project -> ProjectDto.getProject(project, projectInstrumentRepository))
                 .collect(Collectors.toList());
-//        return projectInstrumentRepository.findByProjectId(projectId).stream().map(ProjectInstrument::getInstrument)
-//                .map(InstrumentDto::response).collect(Collectors.toList());
-
     }
 
 

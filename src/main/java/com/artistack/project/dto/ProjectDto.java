@@ -4,12 +4,12 @@ import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.ProjectInstrumentRepository;
 import com.artistack.project.domain.Project;
 import com.artistack.user.domain.User;
-import com.artistack.user.dto.UserDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 @Getter
 public class ProjectDto {
 
+    private LocalDateTime  createdAt;
+    private LocalDateTime modifiedAt;
     private Long id;
     private String videoUrl;
     private String title;
@@ -42,6 +44,8 @@ public class ProjectDto {
 
     public static ProjectDto response(Project project, ProjectInstrumentRepository projectInstrumentRepository) {
         return ProjectDto.builder()
+                .createdAt(project.getCreatedAt())
+                .modifiedAt(project.getModifiedAt())
                 .id(project.getId())
                 .videoUrl(project.getVideoUrl())
                 .title(project.getTitle())
@@ -67,6 +71,8 @@ public class ProjectDto {
     public static ProjectDto getProject(Project project, ProjectInstrumentRepository projectInstrumentRepository) {
 
         return ProjectDto.builder()
+                .createdAt(project.getCreatedAt())
+                .modifiedAt(project.getModifiedAt())
                 .id(project.getId())
                 .videoUrl(project.getVideoUrl())
                 .title(project.getTitle())
@@ -91,6 +97,7 @@ public class ProjectDto {
     public Project toEntity(String videoUrl, Long prevProjectId) {
         return Project.builder()
                 .videoUrl(videoUrl)
+                .title(title)
                 .description(description)
                 .bpm(bpm)
                 .codeFlow(codeFlow)
