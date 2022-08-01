@@ -92,7 +92,7 @@ class OAuthControllerTest extends BaseControllerTest {
     JwtDto signUp(HashMap<String, Object> body, int code) throws Exception {
         MvcResult res = mockMvc.perform(get("/oauth/signUp")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + (body.get("providerType").equals("KAKAO") ? kakaoToken : ""))
+                .header("Authorization", "Bearer " + (body.get("providerType").equals("KAKAO") ? kakaoToken : "dddd"))
                 .content(objectMapper.writeValueAsString(body))
             )
             .andExpect(jsonPath("$.code").value(code))
