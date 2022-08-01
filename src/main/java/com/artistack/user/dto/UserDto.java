@@ -18,11 +18,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
 
@@ -36,6 +38,9 @@ public class UserDto {
     private Role role;
 
     private UserRepository userRepository;
+
+    public UserDto() {
+    }
 
     public static UserDto baseResponse(User user) {
         return baseResponse(user, null);
