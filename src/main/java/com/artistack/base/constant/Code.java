@@ -55,7 +55,7 @@ public enum Code {
     TITLE_TOO_LONG(2202, HttpStatus.BAD_REQUEST, "Title is too long"),
     DESCRIPTION_TOO_LONG(2203, HttpStatus.BAD_REQUEST, "Description is too long"),
     PREV_PROJECT_NOT_EXIST(2204, HttpStatus.BAD_REQUEST, "Previous project doesn't exist"),
-    PREV_PROJECT_NOT_STACKABLE(2205, HttpStatus.BAD_REQUEST, "Previous project isn't stackable"
+    PREV_PROJECT_NOT_STACKABLE(2205, HttpStatus.BAD_REQUEST, "Previous project isn't stackable"),
     ;
 
 
