@@ -5,6 +5,7 @@ import com.artistack.base.constant.Code;
 import com.artistack.instrument.domain.Instrument;
 import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.InstrumentRepository;
+import com.artistack.instrument.repository.ProjectInstrumentRepository;
 import com.artistack.project.domain.Project;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.repository.ProjectRepository;
@@ -15,23 +16,41 @@ import com.artistack.util.SecurityUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProjectService {
     private final S3UploaderService s3UploaderService;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final InstrumentRepository instrumentRepository;
+    private final ProjectInstrumentRepository projectInstrumentRepository;
 
+    // 프로젝트 전체 조회
+    public List<ProjectDto> getAll() {
+        return projectRepository.findAll().stream().map(ProjectDto::response).collect(Collectors.toList());
+    }
+
+    // 프로젝트 정보 조회
+    public List<ProjectDto> getById(Long projectId) {
+        return projectRepository.findById(projectId).stream().map(project -> ProjectDto.getProject(project, projectInstrumentRepository))
+            .collect(Collectors.toList());
+    }
+
+    // 프로젝트 게시
     public String insertProject(Long prevProjectId, MultipartFile video, ProjectDto projectDto) {
 
         Boolean isInitial = prevProjectId.equals(0L);
 
-        // validation: 최초 프로젝트가 아닐 경우
+        // validaiton: 최초 프로젝트가 아닐 경우
         if (!isInitial) {
             // 1. 이전 프로젝트가 존재하는가?
             if (!projectRepository.findById(prevProjectId).isPresent()) {

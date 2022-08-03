@@ -10,10 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Getter
@@ -53,9 +50,12 @@ public class Project extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    private Integer viewCount;
+
     @Builder
-    public Project(String videoUrl, String title, String description, String bpm, String codeFlow,
-        Instrument instrument, Integer scope, Boolean isStackable, Long prevProjectId, User user) {
+    public Project(Long id, String videoUrl, String title, String description, String bpm, String codeFlow,
+        Instrument instrument, Integer scope, Boolean isStackable, Long prevProjectId, User user, Integer viewCount) {
+        this.id = id;
         this.videoUrl = videoUrl;
         this.title = title;
         this.description = description;
@@ -64,6 +64,7 @@ public class Project extends BaseTimeEntity {
         this.instrument = instrument;
         this.scope = scope;
         this.isStackable = isStackable;
+        this.viewCount = viewCount;
         this.prevProjectId = prevProjectId;
         this.user = user;
     }
