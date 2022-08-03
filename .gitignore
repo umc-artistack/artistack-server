@@ -68,3 +68,5 @@ out/
 HELP.md
 
 aws.yml
+
+application-local.properties

@@ -1,15 +1,18 @@
 package com.artistack.project.domain;
 
 import com.artistack.config.BaseTimeEntity;
+import com.artistack.instrument.domain.Instrument;
+import com.artistack.instrument.domain.ProjectInstrument;
+import com.artistack.user.domain.User;
 import com.sun.istack.NotNull;
+import java.util.List;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Getter
@@ -28,12 +31,12 @@ public class Project extends BaseTimeEntity {
     @NotNull
     private String description;
 
-    private Integer bpm;
+    private String bpm;
 
     private String codeFlow;
 
-    @NotNull
-    private Integer instrumentId;
+    @OneToMany(mappedBy = "project")
+    List<ProjectInstrument> instruments;
 
     @NotNull
     private Integer scope;
@@ -44,16 +47,26 @@ public class Project extends BaseTimeEntity {
     @NotNull
     private Long prevProjectId;
 
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    private Integer viewCount;
+
     @Builder
-    public Project(String videoUrl, String title, String description, Integer bpm, String codeFlow, Integer instrumentId, Integer scope, Boolean isStackable, Long prevProjectId) {
+    public Project(Long id, String videoUrl, String title, String description, String bpm, String codeFlow,
+        List<ProjectInstrument> instruments, Integer scope, Boolean isStackable, Long prevProjectId, User user, Integer viewCount) {
+        this.id = id;
         this.videoUrl = videoUrl;
         this.title = title;
         this.description = description;
         this.bpm = bpm;
         this.codeFlow = codeFlow;
-        this.instrumentId = instrumentId;
+        this.instruments = instruments;
         this.scope = scope;
         this.isStackable = isStackable;
+        this.viewCount = viewCount;
         this.prevProjectId = prevProjectId;
+        this.user = user;
     }
 }
