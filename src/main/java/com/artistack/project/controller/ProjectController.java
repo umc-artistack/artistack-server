@@ -5,6 +5,9 @@ import com.artistack.base.constant.Code;
 import com.artistack.base.dto.DataResponseDto;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.service.ProjectService;
+import com.artistack.user.dto.UserDto;
+import io.swagger.annotations.ApiImplicitParams;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 
@@ -42,7 +45,7 @@ public class ProjectController {
 
     /**
      *  프로젝트 정보 조회 API - 셀리나
-     *  [Post] /projects/{projectId}
+     *  [Get] /projects/{projectId}/info
      */
     @ApiOperation(value = "프로젝트 정보 조회")
     @GetMapping("/{id}/info")
@@ -50,6 +53,34 @@ public class ProjectController {
             @PathVariable Long id
     )  {
         return DataResponseDto.of(projectService.getById(id));
+    }
+
+    /**
+     *  스택 조회 API - 제이
+     *  [Get] /projects/{projectId}/prev
+     *  [Get] /projects/{projectId}/next
+     */
+    @ApiOperation(value = "스택 조회")
+    @ApiImplicitParams( value = {
+        @ApiImplicitParam(name = "projectId", value = "현재 프로젝트 id", required = true, dataType = "integer", paramType = "path"),
+        @ApiImplicitParam(name = "sequence", value = "순서(prev or next)", required = true, dataType = "string", paramType = "path")})
+    @GetMapping("/{projectId}/{sequence}")
+    public DataResponseDto<Object> getStack(@PathVariable Long projectId, @PathVariable String sequence) {
+        // validation
+        // 1. query parameter가 next, prev를 제외한 다른 값이 들어올 경우
+        if (!(sequence.equals("next") || sequence.equals("prev"))) {
+            throw new GeneralException(Code.INVALID_SEQUENCE, "sequence는 prev나 next만 사용할 수 있습니다.");
+        }
+
+        try {
+            List<UserDto> stackers = projectService.getStackers(projectId, sequence);
+
+            return DataResponseDto.of(stackers);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     /**

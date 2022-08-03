@@ -1,6 +1,7 @@
 package com.artistack.user.dto;
 
 import com.artistack.instrument.domain.Instrument;
+import com.artistack.instrument.domain.ProjectInstrument;
 import com.artistack.instrument.domain.UserInstrument;
 import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.UserInstrumentRepository;
@@ -61,15 +62,11 @@ public class UserDto {
             .build();
     }
 
-    public static UserDto stackResponse(User user, Instrument instrument) {
-        InstrumentDto instrumentDto = InstrumentDto.response(instrument);
-
-        List<InstrumentDto> instrumentDtoList = Arrays.asList(instrumentDto);
-
+    public static UserDto stackResponse(User user, List<InstrumentDto> instruments) {
         return UserDto.builder()
             .nickname(user.getNickname())
             .profileImgUrl(user.getProfileImgUrl())
-            .instruments(instrumentDtoList)
+            .instruments(instruments)
             .build();
     }
 
