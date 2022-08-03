@@ -2,8 +2,10 @@ package com.artistack.project.domain;
 
 import com.artistack.config.BaseTimeEntity;
 import com.artistack.instrument.domain.Instrument;
+import com.artistack.instrument.domain.ProjectInstrument;
 import com.artistack.user.domain.User;
 import com.sun.istack.NotNull;
+import java.util.List;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import lombok.Builder;
@@ -33,9 +35,8 @@ public class Project extends BaseTimeEntity {
 
     private String codeFlow;
 
-    @OneToOne
-    @JoinColumn(name = "instrument_id")
-    private Instrument instrument;
+    @OneToMany(mappedBy = "project")
+    List<ProjectInstrument> instruments;
 
     @NotNull
     private Integer scope;
@@ -54,14 +55,14 @@ public class Project extends BaseTimeEntity {
 
     @Builder
     public Project(Long id, String videoUrl, String title, String description, String bpm, String codeFlow,
-        Instrument instrument, Integer scope, Boolean isStackable, Long prevProjectId, User user, Integer viewCount) {
+        List<ProjectInstrument> instruments, Integer scope, Boolean isStackable, Long prevProjectId, User user, Integer viewCount) {
         this.id = id;
         this.videoUrl = videoUrl;
         this.title = title;
         this.description = description;
         this.bpm = bpm;
         this.codeFlow = codeFlow;
-        this.instrument = instrument;
+        this.instruments = instruments;
         this.scope = scope;
         this.isStackable = isStackable;
         this.viewCount = viewCount;

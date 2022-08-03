@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
@@ -17,6 +18,7 @@ import lombok.Getter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @Builder
+@AllArgsConstructor
 public class ProjectDto {
     private Long id;
     private String videoUrl;
@@ -26,8 +28,6 @@ public class ProjectDto {
     private String bpm;
 
     private String codeFlow;
-
-    private Integer instrument;
 
     private Integer scope;
 
@@ -44,6 +44,10 @@ public class ProjectDto {
     private Integer likeCount;
 
     private Integer stackCount;
+
+    public ProjectDto() {
+
+    }
 
     public static ProjectDto response(Project project) {
         return response(project, null);
@@ -92,31 +96,33 @@ public class ProjectDto {
 
     }
 
-    public ProjectDto(String title, String description, String bpm, String codeFlow, Integer instrument,
-        Integer scope, Boolean isStackable) {
-        this.title = title;
-        this.description = description;
-        this.bpm = bpm;
-        this.codeFlow = codeFlow;
-        this.instrument = instrument;
-        this.scope = scope;
-        this.isStackable = isStackable;
+    public static ProjectDto insertProject(String title, String description, String bpm, String codeFlow,
+        List<InstrumentDto> instruments, Integer scope, Boolean isStackable) {
+        return ProjectDto.builder()
+            .title(title)
+            .description(description)
+            .bpm(bpm)
+            .codeFlow(codeFlow)
+            .instruments(instruments)
+            .scope(scope)
+            .isStackable(isStackable)
+            .build();
     }
 
     // ProjectDto -> Project
     // (+) videoUrl, prevProjectId, User 추가적으로 필요
-    public Project toEntity(String videoUrl, Long prevProjectId, InstrumentDto instrumentDto, User user) {
+    public Project toEntity(String videoUrl, Long prevProjectId, User user) {
         return Project.builder()
                 .videoUrl(videoUrl)
                 .title(title)
                 .description(description)
                 .bpm(bpm)
                 .codeFlow(codeFlow)
-                .instrument(instrumentDto.toEntity())
                 .scope(scope)
                 .isStackable(isStackable)
                 .prevProjectId(prevProjectId)
                 .user(user)
+                .viewCount(0)
                 .build();
     }
 }
