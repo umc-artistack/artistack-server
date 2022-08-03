@@ -21,8 +21,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ProjectDto {
     private Long id;
+
     private String videoUrl;
+
     private String title;
+
     private String description;
 
     private String bpm;

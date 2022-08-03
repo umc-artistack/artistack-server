@@ -6,12 +6,15 @@ import com.artistack.base.dto.DataResponseDto;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.service.ProjectService;
 
-import com.artistack.util.SecurityUtil;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,13 +56,18 @@ public class ProjectController {
      *  프로젝트 게시 API - 제이
      *  [Post] /projects/{prevProjectId}
      */
-    @PostMapping("/{prevProjectId}")
+
+    @ApiOperation(
+        value = "프로젝트 등록",
+        notes = "이전 프로젝트가 없는 경우 prevProjectId를 0으로 해주세요"
+    )
+    @ApiImplicitParam(name = "prevProjectId", value = "이전 프로젝트 id", dataType = "integer", defaultValue = "0")
+    @PostMapping(value = "/{prevProjectId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public DataResponseDto<Object> uploadProject(
         @PathVariable Long prevProjectId,
         @RequestPart(value = "video") MultipartFile video,
-        @RequestPart(value = "dto") ProjectDto projectDto
+        @RequestPart(value = "dto") @Parameter(schema =@Schema(type = "string", format = "binary")) ProjectDto projectDto
         ) {
-
         // validation: 비디오 파일이 비어 있을 경우
         if (video.isEmpty()) {
             throw new GeneralException(Code.EMPTY_VIDEO, "비디오 파일이 비어있습니다.");
