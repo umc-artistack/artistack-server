@@ -73,7 +73,7 @@ public class ProjectDto {
     }
 
     public static ProjectDto getProject(Project project) {
-        return response(project, null);
+        return getProject(project, null);
     }
 
     public static ProjectDto getProject(Project project, ProjectInstrumentRepository projectInstrumentRepository) {
