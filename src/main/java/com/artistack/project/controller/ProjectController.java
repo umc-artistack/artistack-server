@@ -6,6 +6,9 @@ import com.artistack.base.dto.DataResponseDto;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.service.ProjectService;
 import java.util.List;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,11 +21,34 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Api(tags = "Projects")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/projects")
 public class ProjectController {
+
     private final ProjectService projectService;
+
+    /**
+     *  프로젝트 전체 조회 API - 셀리나 (탐색)
+     *  [GET] /projects
+     *  후순위 개발
+     */
+    @ApiOperation(value = "프로젝트 전체 조회")
+    @GetMapping("")
+    public DataResponseDto<Object> getAllProjects() { return DataResponseDto.of(projectService.getAll()); }
+
+    /**
+     *  프로젝트 정보 조회 API - 셀리나
+     *  [Post] /projects/{projectId}
+     */
+    @ApiOperation(value = "프로젝트 정보 조회")
+    @GetMapping("/{id}/info")
+    public DataResponseDto<Object> getProject(
+            @PathVariable Long id
+    )  {
+        return DataResponseDto.of(projectService.getById(id));
+    }
 
     /**
      *  프로젝트 게시 API - 제이
@@ -61,5 +87,4 @@ public class ProjectController {
             throw e;
         }
     }
-
 }

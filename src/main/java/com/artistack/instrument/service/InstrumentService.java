@@ -5,9 +5,11 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 import com.artistack.base.GeneralException;
 import com.artistack.base.constant.Code;
 import com.artistack.instrument.domain.Instrument;
+import com.artistack.instrument.domain.ProjectInstrument;
 import com.artistack.instrument.domain.UserInstrument;
 import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.InstrumentRepository;
+import com.artistack.instrument.repository.ProjectInstrumentRepository;
 import com.artistack.instrument.repository.UserInstrumentRepository;
 import com.artistack.user.domain.User;
 import com.artistack.user.repository.UserRepository;
@@ -28,6 +30,7 @@ public class InstrumentService {
     private final UserRepository userRepository;
     private final InstrumentRepository instrumentRepository;
     private final UserInstrumentRepository userInstrumentRepository;
+    private final ProjectInstrumentRepository projectInstrumentRepository;
 
     @PostConstruct
     public void initialize() {
@@ -63,5 +66,10 @@ public class InstrumentService {
         }
 
         return getByUserId(userId);
+    }
+
+    public List<InstrumentDto> getByProjectId(Long projectId) {
+        return projectInstrumentRepository.findByProjectId(projectId).stream().map(ProjectInstrument::getInstrument)
+                .map(InstrumentDto::response).collect(Collectors.toList());
     }
 }
