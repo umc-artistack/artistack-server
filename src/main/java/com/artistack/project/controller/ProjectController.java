@@ -62,7 +62,7 @@ public class ProjectController {
      */
     @ApiOperation(value = "스택 조회")
     @ApiImplicitParams( value = {
-        @ApiImplicitParam(name = "projectId", value = "현재 프로젝트 id", required = true, dataType = "integer", paramType = "path"),
+        @ApiImplicitParam(name = "projectId", value = "현재 프로젝트 id", required = true, dataType = "long", paramType = "path"),
         @ApiImplicitParam(name = "sequence", value = "순서(prev or next)", required = true, dataType = "string", paramType = "path")})
     @GetMapping("/{projectId}/{sequence}")
     public DataResponseDto<Object> getStack(@PathVariable Long projectId, @PathVariable String sequence) {
@@ -87,13 +87,12 @@ public class ProjectController {
      *  프로젝트 게시 API - 제이
      *  [Post] /projects/{prevProjectId}
      */
-
     @ApiOperation(
         value = "프로젝트 등록",
         notes = "이전 프로젝트가 없는 경우 prevProjectId를 0으로 해주세요"
     )
-    @ApiImplicitParam(name = "prevProjectId", value = "이전 프로젝트 id", dataType = "integer", defaultValue = "0")
-    @PostMapping(value = "/{prevProjectId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ApiImplicitParam(name = "prevProjectId", value = "이전 프로젝트 id", dataType = "long", defaultValue = "0")
+    @PostMapping(value = "/{prevProjectId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public DataResponseDto<Object> uploadProject(
         @PathVariable Long prevProjectId,
         @RequestPart(value = "video") MultipartFile video,
