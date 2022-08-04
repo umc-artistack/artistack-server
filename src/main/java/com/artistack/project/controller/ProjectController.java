@@ -5,11 +5,15 @@ import com.artistack.base.constant.Code;
 import com.artistack.base.dto.DataResponseDto;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.service.ProjectService;
+import com.artistack.user.dto.UserDto;
+import io.swagger.annotations.ApiImplicitParams;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.RequiredArgsConstructor;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 
 @Api(tags = "Projects")
 @RequiredArgsConstructor
@@ -42,7 +45,7 @@ public class ProjectController {
 
     /**
      *  프로젝트 정보 조회 API - 셀리나
-     *  [Post] /projects/{projectId}
+     *  [Get] /projects/{projectId}/info
      */
     @ApiOperation(value = "프로젝트 정보 조회")
     @GetMapping("/{id}/info")
@@ -53,16 +56,43 @@ public class ProjectController {
     }
 
     /**
+     *  스택 조회 API - 제이
+     *  [Get] /projects/{projectId}/prev
+     *  [Get] /projects/{projectId}/next
+     */
+    @ApiOperation(value = "스택 조회")
+    @ApiImplicitParams( value = {
+        @ApiImplicitParam(name = "projectId", value = "현재 프로젝트 id", required = true, dataType = "long", paramType = "path"),
+        @ApiImplicitParam(name = "sequence", value = "순서(prev or next)", required = true, dataType = "string", paramType = "path")})
+    @GetMapping("/{projectId}/{sequence}")
+    public DataResponseDto<Object> getStack(@PathVariable Long projectId, @PathVariable String sequence) {
+        // validation
+        // 1. query parameter가 next, prev를 제외한 다른 값이 들어올 경우
+        if (!(sequence.equals("next") || sequence.equals("prev"))) {
+            throw new GeneralException(Code.INVALID_SEQUENCE, "sequence는 prev나 next만 사용할 수 있습니다.");
+        }
+
+        try {
+            List<UserDto> stackers = projectService.getStackers(projectId, sequence);
+
+            return DataResponseDto.of(stackers);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    /**
      *  프로젝트 게시 API - 제이
      *  [Post] /projects/{prevProjectId}
      */
-
     @ApiOperation(
         value = "프로젝트 등록",
         notes = "이전 프로젝트가 없는 경우 prevProjectId를 0으로 해주세요"
     )
-    @ApiImplicitParam(name = "prevProjectId", value = "이전 프로젝트 id", dataType = "integer", defaultValue = "0")
-    @PostMapping(value = "/{prevProjectId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ApiImplicitParam(name = "prevProjectId", value = "이전 프로젝트 id", dataType = "long", defaultValue = "0")
+    @PostMapping(value = "/{prevProjectId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public DataResponseDto<Object> uploadProject(
         @PathVariable Long prevProjectId,
         @RequestPart(value = "video") MultipartFile video,
