@@ -16,9 +16,8 @@ import com.artistack.user.repository.UserRepository;
 import com.artistack.util.SecurityUtil;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Optional;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @Transactional
 public class ProjectService {
+
     private final S3UploaderService s3UploaderService;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
@@ -58,11 +58,8 @@ public class ProjectService {
      * @return 조건에 맞는 프로젝트들 (profileResponse)
      */
     public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId) {
-        Long userId = artistackId.isEmpty() ? null :
-            userRepository.findByArtistackId(artistackId.get())
-                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, artistackId.get())).getId();
-
-        return projectRepository.getByConditionWithPaging(pageable, userId).map(ProjectDto::profileResponse);
+        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null))
+            .map(ProjectDto::profileResponse);
     }
 
     /**
@@ -130,8 +127,7 @@ public class ProjectService {
     public List<UserDto> getStackers(Long projectId, String sequence) {
         if (sequence.equals("prev")) {
             return getPrevStackers(projectId);
-        }
-        else {
+        } else {
             return getNextStackers(projectId);
         }
     }

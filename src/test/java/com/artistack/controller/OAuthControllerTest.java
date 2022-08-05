@@ -41,7 +41,7 @@ class OAuthControllerTest extends BaseControllerTest {
     @Autowired
     private JwtRepository jwtRepository;
 
-    String kakaoToken = "exHsROGBuWQ1KrJIkWvkGH0ALLDdb4DYrPEP5Zc6Cil1KQAAAYJt4Crs",
+    String kakaoToken = "",
         appleToken = "";
 
     List<Long> instrumentIds = List.of(1L, 3L);

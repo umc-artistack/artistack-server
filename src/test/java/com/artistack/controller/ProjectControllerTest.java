@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.artistack.base.constant.Code;
 import com.artistack.instrument.dto.InstrumentDto;
+import com.artistack.jwt.dto.JwtDto;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.repository.ProjectRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,8 +27,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.web.servlet.MvcResult;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @DisplayName("Controller - Project")
 class ProjectControllerTest extends BaseControllerTest {
@@ -103,7 +102,7 @@ class ProjectControllerTest extends BaseControllerTest {
         List<Long> instrumentIds = List.of(1L, 3L);
 
         List<InstrumentDto> instruments = new ArrayList<>();
-        
+
         for (Long id : instrumentIds) {
             instruments.add(new InstrumentDto(id, null, null));
         }
@@ -142,17 +141,28 @@ class ProjectControllerTest extends BaseControllerTest {
     @DisplayName("artistack id로 프로젝트들 조회")
     void getProjectsByArtistackIdTest() throws Exception {
 
-        int projectCnt = 5, pageSize = 3;
+        int projectCnt = 5, pageSize = 20, otherUserProjectCnt = 2;
         List<String> uploadUrls = new ArrayList<>();
         for (int i = 0; i < projectCnt; i++) {
             uploadUrls.add(uploadProject(accessToken, 0, 1, true, Code.OK.getCode()));
         }
 
+        JwtDto jwt = oAuthControllerTest.signUp(oAuthControllerTest.testUserRegisterBody, Code.OK.getCode());
+        for (int i = 0; i < otherUserProjectCnt; i++) {
+            uploadProject(jwt.getAccessToken(), 0, 1, true, Code.OK.getCode());
+        }
+
         List<ProjectDto> res = getProjectsByArtistackId(accessToken,
             registerBody.get("artistackId").toString(), pageSize, Code.OK.getCode());
 
-        for(int i = 0; i < res.size(); i++)
+        for (int i = 0; i < res.size(); i++) {
             then(res.get(i).getVideoUrl()).isEqualTo(uploadUrls.get(i));
+        }
+
+        then(res.size()).isEqualTo(Math.min(projectCnt, pageSize));
+        then(projectRepository.countByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(projectCnt);
+        then(projectRepository.countByArtistackId(
+            oAuthControllerTest.testUserRegisterBody.get("artistackId").toString())).isEqualTo(otherUserProjectCnt);
     }
 
     // 메이슨
@@ -169,7 +179,8 @@ class ProjectControllerTest extends BaseControllerTest {
 
         Map map = gson.fromJson(res.getResponse().getContentAsString(), Map.class);
         map = gson.fromJson(gson.toJsonTree(map.get("data")), Map.class);
-        return gson.fromJson(gson.toJsonTree(map.get("content")), new TypeToken<ArrayList<ProjectDto>>(){}.getType());
+        return gson.fromJson(gson.toJsonTree(map.get("content")), new TypeToken<ArrayList<ProjectDto>>() {
+        }.getType());
     }
 
     // 메이슨
@@ -185,8 +196,12 @@ class ProjectControllerTest extends BaseControllerTest {
 
         List<ProjectDto> res = getMyProjects(accessToken, pageSize, Code.OK.getCode());
 
-        for(int i = 0; i < res.size(); i++)
+        for (int i = 0; i < res.size(); i++) {
             then(res.get(i).getVideoUrl()).isEqualTo(uploadUrls.get(i));
+        }
+
+        then(res.size()).isEqualTo(Math.min(projectCnt, pageSize));
+        then(projectRepository.countByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(projectCnt);
     }
 
     // 메이슨
@@ -203,6 +218,7 @@ class ProjectControllerTest extends BaseControllerTest {
 
         Map map = gson.fromJson(res.getResponse().getContentAsString(), Map.class);
         map = gson.fromJson(gson.toJsonTree(map.get("data")), Map.class);
-        return gson.fromJson(gson.toJsonTree(map.get("content")), new TypeToken<ArrayList<ProjectDto>>(){}.getType());
+        return gson.fromJson(gson.toJsonTree(map.get("content")), new TypeToken<ArrayList<ProjectDto>>() {
+        }.getType());
     }
 }
