@@ -13,19 +13,21 @@ import com.artistack.oauth.repository.KakaoAccountRepository;
 import com.artistack.user.domain.User;
 import com.artistack.user.dto.UserDto;
 import com.artistack.user.repository.UserRepository;
-import com.artistack.user.service.UserService;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -55,12 +57,16 @@ public class OAuthService {
     public Object signIn(ProviderType providerType, String providerAccessToken) {
         Optional<User> user = Optional.empty();
 
-        if (providerType.equals(ProviderType.KAKAO)) {
-            KakaoAccountDto kakaoAccountDto = getKakaoAccount(providerAccessToken);
-            user = kakaoAccountRepository.findById(kakaoAccountDto.getId()).map(KakaoAccount::getUser);
-            if (user.isEmpty()) {
-                return kakaoAccountDto;
-            }
+        switch (providerType) {
+            case KAKAO:
+                KakaoAccountDto kakaoAccountDto = getKakaoAccount(providerAccessToken);
+                user = kakaoAccountRepository.findById(kakaoAccountDto.getId()).map(KakaoAccount::getUser);
+                if (user.isEmpty()) {
+                    return kakaoAccountDto;
+                }
+                break;
+            case APPLE:
+                break;
         }
         return jwtService.issueJwt(user.get());
     }
