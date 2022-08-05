@@ -57,6 +57,7 @@ public enum Code {
     PREV_PROJECT_NOT_EXIST(2204, HttpStatus.BAD_REQUEST, "Previous project doesn't exist"),
     PREV_PROJECT_NOT_STACKABLE(2205, HttpStatus.BAD_REQUEST, "Previous project isn't stackable"),
     INVALID_SEQUENCE(2206, HttpStatus.BAD_REQUEST, "Invalid sequence"),
+    PROJECT_NOT_FOUND(2207, HttpStatus.BAD_REQUEST, "Cannot find project from DB"),
     INVALID_INSTRUMENT(2301, HttpStatus.BAD_REQUEST, "Invalid instrument"),
     USER_NOT_FOUND(4100, HttpStatus.BAD_REQUEST, "Cannot find user from DB"),
     ;

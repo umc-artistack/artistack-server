@@ -1,6 +1,5 @@
 package com.artistack.user.dto;
 
-import com.artistack.instrument.domain.Instrument;
 import com.artistack.instrument.domain.UserInstrument;
 import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.UserInstrumentRepository;
@@ -8,8 +7,6 @@ import com.artistack.oauth.constant.ProviderType;
 import com.artistack.user.constant.Role;
 import com.artistack.user.domain.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,15 +58,11 @@ public class UserDto {
             .build();
     }
 
-    public static UserDto stackResponse(User user, Instrument instrument) {
-        InstrumentDto instrumentDto = InstrumentDto.response(instrument);
-
-        List<InstrumentDto> instrumentDtoList = Arrays.asList(instrumentDto);
-
+    public static UserDto stackResponse(User user, List<InstrumentDto> instruments) {
         return UserDto.builder()
             .nickname(user.getNickname())
             .profileImgUrl(user.getProfileImgUrl())
-            .instruments(instrumentDtoList)
+            .instruments(instruments)
             .build();
     }
 

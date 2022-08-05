@@ -3,6 +3,7 @@ package com.artistack.project.service;
 import com.artistack.base.GeneralException;
 import com.artistack.base.constant.Code;
 import com.artistack.instrument.domain.Instrument;
+import com.artistack.instrument.domain.ProjectInstrument;
 import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.InstrumentRepository;
 import com.artistack.instrument.repository.ProjectInstrumentRepository;
@@ -10,9 +11,16 @@ import com.artistack.project.domain.Project;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.repository.ProjectRepository;
 import com.artistack.user.domain.User;
+
 import com.artistack.user.repository.UserRepository;
 import com.artistack.util.SecurityUtil;
 import java.io.IOException;
+import com.artistack.user.dto.UserDto;
+import com.artistack.user.repository.UserRepository;
+import com.artistack.util.SecurityUtil;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -89,7 +97,80 @@ public class ProjectService {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-
+//            throw e;
         }
+    }
+
+    // 스택 조회 - 다음 스택인지, 이전 스택인지 선택
+    public List<UserDto> getStackers(Long projectId, String sequence) {
+        if (sequence.equals("prev")) {
+            return getPrevStackers(projectId);
+        }
+
+        else {
+            return getNextStackers(projectId);
+        }
+    }
+
+    // 이전에 스택을 쌓은 유저 목록(이전 스택) 조회
+    public List<UserDto> getPrevStackers(Long projectId) {
+        // while문을 이용하여 prevProjectId = 0(최초 프로젝트)이 될 때까지 스택 조회
+        ArrayList<UserDto> stackers = new ArrayList<>();
+
+        Long prevProjectId = projectRepository.findById(projectId)
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."))
+                .getPrevProjectId();
+
+        while (prevProjectId != 0) {
+            Project project = projectRepository.findById(prevProjectId)
+                .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+
+            User user = project.getUser();
+
+            List<InstrumentDto> instruments = getInstrumentDtoFromProject(project);
+
+            UserDto userDto = UserDto.stackResponse(user, instruments);
+            stackers.add(userDto);
+
+            prevProjectId = project.getPrevProjectId();
+        }
+
+        return stackers;
+    }
+
+    // 현재 스택 위에 스택을 쌓은 유저 목록(다음 스택) 조회
+    public List<UserDto> getNextStackers(Long projectId) {
+        ArrayList<UserDto> stackers = new ArrayList<>();
+
+        // prevProjectId가 projectId인 자식 노드들 반환
+        // 1. prevProjectId가 projectId인 프로젝트들을 찾아
+        List<Project> projects = projectRepository.findAllByPrevProjectId(projectId);
+
+        for (Project project : projects) {
+            Long userId = project.getUser().getId();
+
+            List<InstrumentDto> instruments = getInstrumentDtoFromProject(project);
+
+            // userDto는 ListInstrumentDto(id, name, imgUrl인데 id만 반환할거임)를 사용
+            User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+            UserDto userDto = UserDto.stackResponse(user, instruments);
+            stackers.add(userDto);
+        }
+
+        return stackers;
+
+    }
+
+    // 스택 조회 메서드(getPrevStackers, getNextStackers)에서 중복되는 부분 모듈화
+    // Project > InstrumentDto
+    private List<InstrumentDto> getInstrumentDtoFromProject(Project project) {
+        List<ProjectInstrument> projectInstrumentList = project.getInstruments();
+
+        List<InstrumentDto> instruments = new ArrayList<>();
+        for (ProjectInstrument projectInstrument : projectInstrumentList) {
+            instruments.add(InstrumentDto.response(projectInstrument.getInstrument()));
+        }
+
+        return instruments;
     }
 }
