@@ -51,6 +51,31 @@ public class ProjectService {
             .collect(Collectors.toList());
     }
 
+    /**
+     * 메이슨) 조건에 맞는 프로젝트들을 페이징 기능과 함께 반환합니다
+     *
+     * @param artistackId 조회할 유저의 artistackId (optional)
+     * @return 조건에 맞는 프로젝트들 (profileResponse)
+     */
+    public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId) {
+        Long userId = artistackId.isEmpty() ? null :
+            userRepository.findByArtistackId(artistackId.get())
+                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, artistackId.get())).getId();
+
+        return projectRepository.getByConditionWithPaging(pageable, userId).map(ProjectDto::profileResponse);
+    }
+
+    /**
+     * 메이슨) 내 프로젝트들을 페이징 기능과 함께 반환합니다
+     *
+     * @return 내 프로젝트들 (profileResponse)
+     */
+    public Page<ProjectDto> getMyWithPaging(Pageable pageable) {
+        String artistackId = userRepository.findById(SecurityUtil.getUserId())
+            .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND)).getArtistackId();
+        return getByConditionWithPaging(pageable, Optional.of(artistackId));
+    }
+
     // 프로젝트 게시
     @Transactional
     public String insertProject(Long prevProjectId, MultipartFile video, ProjectDto projectDto) {

@@ -53,7 +53,10 @@ public class Project extends BaseTimeEntity {
     private User user;
 
     private Integer viewCount;
-    
+
+    // 메이슨) 현재 프로젝트를 스택한 프로젝트 개수
+    @Formula("(SELECT count(*) FROM project p where p.prev_project_id = id)")
+    private Integer stackCount;
 
     @Builder
     public Project(Long id, String videoUrl, String title, String description, String bpm, String codeFlow,

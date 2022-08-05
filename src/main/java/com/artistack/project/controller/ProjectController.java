@@ -60,6 +60,30 @@ public class ProjectController {
     }
 
     /**
+     *  조건, 페이징과 함께 프로젝트 정보 조회 API - 메이슨
+     *  [Get] /projects/search
+     */
+    @ApiOperation(value = "조건, 페이징과 함께 프로젝트 정보 조회")
+    @GetMapping("/search")
+    public DataResponseDto<Object> getProjectsByConditionWithPaging(
+        Pageable pageable,
+        @RequestParam Optional<String> artistackId
+    ) {
+        return DataResponseDto.of(projectService.getByConditionWithPaging(pageable, artistackId));
+    }
+    /**
+     *  조건, 페이징과 함께 프로젝트 정보 조회 API - 메이슨
+     *  [Get] /projects/search
+     */
+    @ApiOperation(value = "조건, 페이징과 함께 프로젝트 정보 조회")
+    @GetMapping("/me")
+    public DataResponseDto<Object> getMyProjectsByConditionWithPaging(
+        Pageable pageable
+    ) {
+        return DataResponseDto.of(projectService.getMyWithPaging(pageable));
+    }
+
+    /**
      *  스택 조회 API - 제이
      *  [Get] /projects/{projectId}/prev
      *  [Get] /projects/{projectId}/next

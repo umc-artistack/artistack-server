@@ -22,4 +22,9 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Project> findAllByPrevProjectId(Long id);
 
     Optional<Project> findProjectByPrevProjectId(Long id);
+
+    // 메이슨
+    // TODO: status가 공개(public)인 프로젝트만 조회 가능하게 수정
+    @Query(value = "SELECT p FROM Project p WHERE (:userId IS NULL OR p.user.id = :userId)")
+    Page<Project> getByConditionWithPaging(Pageable pageable, Long userId);
 }

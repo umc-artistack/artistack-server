@@ -72,6 +72,14 @@ public class UserDto {
             .build();
     }
 
+    public static UserDto stackResponse(User user, List<InstrumentDto> instruments) {
+        return UserDto.builder()
+            .nickname(user.getNickname())
+            .profileImgUrl(user.getProfileImgUrl())
+            .instruments(instruments)
+            .build();
+    }
+
     public User toEntity(UserRepository userRepository) {
         this.userRepository = userRepository;
 
