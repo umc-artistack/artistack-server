@@ -4,24 +4,18 @@ import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import com.artistack.base.constant.Code;
-import com.artistack.instrument.domain.Instrument;
-import com.artistack.instrument.domain.UserInstrument;
 import com.artistack.instrument.repository.UserInstrumentRepository;
 import com.artistack.jwt.dto.JwtDto;
-import com.artistack.oauth.dto.KakaoAccountDto;
 import com.artistack.oauth.repository.KakaoAccountRepository;
 import com.artistack.user.constant.Role;
 import com.artistack.user.domain.User;
 import com.artistack.user.dto.UserDto;
 import com.artistack.user.repository.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,6 +41,62 @@ class UserControllerTest extends BaseControllerTest {
     @BeforeEach
     void setUp() {
         oAuthControllerTest.mockMvc = mockMvc;
+    }
+
+    @Test
+    @DisplayName("내 정보 조회")
+    void getMeTest() throws Exception {
+        JwtDto jwt = oAuthControllerTest.signUp(oAuthControllerTest.testUserRegisterBody, Code.OK.getCode());
+
+        UserDto res = getMe(jwt.getAccessToken(), Code.OK.getCode());
+
+        then(res.getDescription()).isEqualTo(oAuthControllerTest.testUserRegisterBody.get("description"));
+        then(res.getNickname()).isEqualTo(oAuthControllerTest.testUserRegisterBody.get("nickname"));
+        then(res.getArtistackId()).isEqualTo(oAuthControllerTest.testUserRegisterBody.get("artistackId"));
+        then(res.getProfileImgUrl()).isEqualTo(oAuthControllerTest.testUserRegisterBody.get("profileImgUrl"));
+    }
+
+    UserDto getMe(String ac, int code) throws Exception {
+        MvcResult res = mockMvc.perform(get("/users/me")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + ac)
+            )
+            .andExpect(jsonPath("$.code").value(code))
+            .andDo(print())
+            .andReturn();
+
+        Map map = gson.fromJson(res.getResponse().getContentAsString(), Map.class);
+        return gson.fromJson(gson.toJsonTree(map.get("data")), UserDto.class);
+    }
+
+    @Test
+    @DisplayName("다른 유저 정보 조회")
+    void getUserTest() throws Exception {
+        JwtDto jwt = oAuthControllerTest.signUp(oAuthControllerTest.testUserRegisterBody, Code.OK.getCode());
+        String anotherUserArtistackId = "anotheruser";
+        oAuthControllerTest.testUserRegisterBody.put("artistackId", anotherUserArtistackId);
+        oAuthControllerTest.testUserRegisterBody.put("nickname", "다른가입유저");
+        oAuthControllerTest.signUp(oAuthControllerTest.testUserRegisterBody, Code.OK.getCode());
+
+        UserDto res = getUser(jwt.getAccessToken(), anotherUserArtistackId, Code.OK.getCode());
+
+        then(res.getDescription()).isEqualTo(oAuthControllerTest.testUserRegisterBody.get("description"));
+        then(res.getNickname()).isEqualTo(oAuthControllerTest.testUserRegisterBody.get("nickname"));
+        then(res.getArtistackId()).isEqualTo(oAuthControllerTest.testUserRegisterBody.get("artistackId"));
+        then(res.getProfileImgUrl()).isEqualTo(oAuthControllerTest.testUserRegisterBody.get("profileImgUrl"));
+    }
+
+    UserDto getUser(String ac, String artistackId, int code) throws Exception {
+        MvcResult res = mockMvc.perform(get("/users/"+artistackId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + ac)
+            )
+            .andExpect(jsonPath("$.code").value(code))
+            .andDo(print())
+            .andReturn();
+
+        Map map = gson.fromJson(res.getResponse().getContentAsString(), Map.class);
+        return gson.fromJson(gson.toJsonTree(map.get("data")), UserDto.class);
     }
 
     @Test
@@ -85,7 +135,7 @@ class UserControllerTest extends BaseControllerTest {
     }
 
     @Test
-    @DisplayName("회원 정보 수정 실패1")
+    @DisplayName("회원 정보 수정 실패 (닉네임 공백)")
     void updateUserFailTest1() throws Exception {
         JwtDto jwt = oAuthControllerTest.signUp(oAuthControllerTest.testUserRegisterBody, Code.OK.getCode());
 
@@ -99,12 +149,12 @@ class UserControllerTest extends BaseControllerTest {
     }
 
     @Test
-    @DisplayName("회원 정보 수정 실패2")
+    @DisplayName("회원 정보 수정 실패 (설명 길이)")
     void updateUserFailTest2() throws Exception {
         JwtDto jwt = oAuthControllerTest.signUp(oAuthControllerTest.testUserRegisterBody, Code.OK.getCode());
 
         HashMap<String, Object> body = new HashMap<>() {{
-            put("description", "newdfasdfasdjbfhjagiajgooijwgjoiearoijgfv;oiearhguilehariugvhearlihvleiarhvlisdapfokaspokueahdlivsafsdnew nick");
+            put("description", "newdfasdfasdjbfhjagiajgooijwgjafsdnew nick");
         }};
 
         updateUser(jwt.getAccessToken(), body, Code.USER_DESCRIPTION_FORMAT_ERROR.getCode());
@@ -117,6 +167,7 @@ class UserControllerTest extends BaseControllerTest {
                 .content(objectMapper.writeValueAsString(body))
             )
             .andExpect(jsonPath("$.code").value(code))
+            .andDo(print())
             .andReturn();
 
         Map map = gson.fromJson(res.getResponse().getContentAsString(), Map.class);
@@ -144,6 +195,7 @@ class UserControllerTest extends BaseControllerTest {
                 .header("Authorization", "Bearer " + ac)
             )
             .andExpect(jsonPath("$.code").value(code))
+            .andDo(print())
             .andReturn();
 
         Map map = gson.fromJson(res.getResponse().getContentAsString(), Map.class);
@@ -174,6 +226,7 @@ class UserControllerTest extends BaseControllerTest {
                 .header("Authorization", "Bearer " + ac)
             )
             .andExpect(jsonPath("$.code").value(code))
+            .andDo(print())
             .andReturn();
 
         Map map = gson.fromJson(res.getResponse().getContentAsString(), Map.class);
@@ -202,18 +255,6 @@ class UserControllerTest extends BaseControllerTest {
         then(user.getNickname()).isNull();
         then(user.getDescription()).isNull();
         then(user.getProfileImgUrl()).isNull();
-    }
-
-    Boolean withdrawKakaoUser(String ac, int code) throws Exception {
-        MvcResult res = mockMvc.perform(delete("/users/me")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + ac)
-            )
-            .andExpect(jsonPath("$.code").value(code))
-            .andReturn();
-
-        Map map = gson.fromJson(res.getResponse().getContentAsString(), Map.class);
-        return Boolean.parseBoolean(map.get("data").toString());
     }
 
     boolean iskakaoTokenPresent() {

@@ -133,4 +133,74 @@ class ProjectControllerTest extends BaseControllerTest {
 
         return map.get("data").toString();
     }
+
+
+    // 메이슨
+    @Test
+    @DisplayName("artistack id로 프로젝트들 조회")
+    void getProjectsByArtistackIdTest() throws Exception {
+
+        int projectCnt = 5, pageSize = 3;
+        List<String> uploadUrls = new ArrayList<>();
+        for (int i = 0; i < projectCnt; i++) {
+            uploadUrls.add(uploadProject(accessToken, 0, 1, true, Code.OK.getCode()));
+        }
+
+        List<ProjectDto> res = getProjectsByArtistackId(accessToken,
+            registerBody.get("artistackId").toString(), pageSize, Code.OK.getCode());
+
+        for(int i = 0; i < res.size(); i++)
+            then(res.get(i).getVideoUrl()).isEqualTo(uploadUrls.get(i));
+    }
+
+    // 메이슨
+    List<ProjectDto> getProjectsByArtistackId(String ac, String artistackId, int pageSize, int code)
+        throws Exception {
+        MvcResult res = mockMvc.perform(
+                get(String.format("/projects/search?artistackId=%s&page=0&size=%d", artistackId, pageSize))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + ac)
+            )
+            .andExpect(jsonPath("$.code").value(code))
+            .andDo(print())
+            .andReturn();
+
+        Map map = gson.fromJson(res.getResponse().getContentAsString(), Map.class);
+        map = gson.fromJson(gson.toJsonTree(map.get("data")), Map.class);
+        return gson.fromJson(gson.toJsonTree(map.get("content")), new TypeToken<ArrayList<ProjectDto>>(){}.getType());
+    }
+
+    // 메이슨
+    @Test
+    @DisplayName("내 프로젝트들 조회")
+    void getMyProjectsTest() throws Exception {
+
+        int projectCnt = 5, pageSize = 3;
+        List<String> uploadUrls = new ArrayList<>();
+        for (int i = 0; i < projectCnt; i++) {
+            uploadUrls.add(uploadProject(accessToken, 0, 1, true, Code.OK.getCode()));
+        }
+
+        List<ProjectDto> res = getMyProjects(accessToken, pageSize, Code.OK.getCode());
+
+        for(int i = 0; i < res.size(); i++)
+            then(res.get(i).getVideoUrl()).isEqualTo(uploadUrls.get(i));
+    }
+
+    // 메이슨
+    List<ProjectDto> getMyProjects(String ac, int pageSize, int code)
+        throws Exception {
+        MvcResult res = mockMvc.perform(
+                get(String.format("/projects/me?page=0&size=%d", pageSize))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + ac)
+            )
+            .andExpect(jsonPath("$.code").value(code))
+            .andDo(print())
+            .andReturn();
+
+        Map map = gson.fromJson(res.getResponse().getContentAsString(), Map.class);
+        map = gson.fromJson(gson.toJsonTree(map.get("data")), Map.class);
+        return gson.fromJson(gson.toJsonTree(map.get("content")), new TypeToken<ArrayList<ProjectDto>>(){}.getType());
+    }
 }
