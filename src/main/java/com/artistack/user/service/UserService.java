@@ -46,6 +46,13 @@ public class UserService {
         return get(SecurityUtil.getUserId());
     }
 
+    public UserDto getByArtistackId(String artistackId) {
+        Long id = userRepository.findByArtistackId(artistackId)
+            .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, artistackId)).getId();
+        return get(id);
+    }
+
+
     /**
      * 메이슨) 내 정보를 업데이트합니다
      *

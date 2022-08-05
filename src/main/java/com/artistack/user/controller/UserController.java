@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,11 +23,19 @@ public class UserController {
 
     private final UserService userService;
 
+    // 메이슨) 내 정보를 불러옵니다
     @GetMapping(path = "/me")
     public DataResponseDto<Object> getMe() {
         return DataResponseDto.of(userService.getMe());
     }
 
+    // 메이슨) artistack id로 타 유저 정보를 불러옵니다
+    @GetMapping(path = "/{artistackId}")
+    public DataResponseDto<Object> getUser(@PathVariable String artistackId) {
+        return DataResponseDto.of(userService.getByArtistackId(artistackId));
+    }
+
+    // 메이슨) 내 정보를 수정합니다
     @PatchMapping(path = "/me")
     public DataResponseDto<Object> updateMe(
         @RequestBody UserDto userDto
@@ -34,12 +43,14 @@ public class UserController {
         return DataResponseDto.of(userService.updateMe(userDto));
     }
 
+    // 메이슨) 회원 탈퇴를 진행합니다
     @DeleteMapping(path = "/me")
     public DataResponseDto<Object> deleteMe(
     ) {
         return DataResponseDto.of(userService.deleteMe());
     }
 
+    // 메이슨) 유저 정보 중복 여부를 체크합니다
     @GetMapping(path = "/duplicate")
     public DataResponseDto<Object> checkDuplicate(
         @RequestParam("type") String type,
