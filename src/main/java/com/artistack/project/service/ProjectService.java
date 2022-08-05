@@ -16,8 +16,9 @@ import com.artistack.user.repository.UserRepository;
 import com.artistack.util.SecurityUtil;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @Transactional
 public class ProjectService {
-
     private final S3UploaderService s3UploaderService;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
@@ -130,7 +130,8 @@ public class ProjectService {
     public List<UserDto> getStackers(Long projectId, String sequence) {
         if (sequence.equals("prev")) {
             return getPrevStackers(projectId);
-        } else {
+        }
+        else {
             return getNextStackers(projectId);
         }
     }
@@ -177,6 +178,7 @@ public class ProjectService {
             // userDto는 ListInstrumentDto(id, name, imgUrl인데 id만 반환할거임)를 사용
             User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+
             UserDto userDto = UserDto.stackResponse(user, instruments);
             stackers.add(userDto);
         }

@@ -27,6 +27,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
 @DisplayName("Controller - Project")
 class ProjectControllerTest extends BaseControllerTest {
 
@@ -86,7 +88,6 @@ class ProjectControllerTest extends BaseControllerTest {
      * TODO: 이전 프로젝트가 없는데 쌓을 경우
      * TODO: 이전 프로젝트가 스택 비허용인데 쌓을 경우
      */
-
 //    @Test
 //    @DisplayName("스택 실패 - 이전 프로젝트 없음")
 //    void stackFailWithoutPrev() throws Exception {
@@ -102,6 +103,7 @@ class ProjectControllerTest extends BaseControllerTest {
         List<Long> instrumentIds = List.of(1L, 3L);
 
         List<InstrumentDto> instruments = new ArrayList<>();
+        
         for (Long id : instrumentIds) {
             instruments.add(new InstrumentDto(id, null, null));
         }

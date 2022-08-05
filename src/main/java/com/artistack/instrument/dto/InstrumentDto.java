@@ -29,6 +29,14 @@ public class InstrumentDto {
             .build();
     }
 
+    public Instrument toEntity() {
+        return Instrument.builder()
+            .id(id)
+            .name(name)
+            .imgUrl(imgUrl)
+            .build();
+    }
+
     public ProjectInstrument toEntity(Project project, Instrument instrument) {
         return ProjectInstrument.builder()
             .project(project)
