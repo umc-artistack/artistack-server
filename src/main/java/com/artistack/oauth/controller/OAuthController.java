@@ -3,6 +3,7 @@ package com.artistack.oauth.controller;
 import com.artistack.base.constant.Code;
 import com.artistack.base.dto.DataResponseDto;
 import com.artistack.jwt.dto.JwtDto;
+import com.artistack.jwt.service.JwtService;
 import com.artistack.oauth.constant.ProviderType;
 import com.artistack.oauth.service.OAuthService;
 import com.artistack.user.dto.UserDto;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OAuthController {
 
     private final OAuthService oAuthService;
+    private final JwtService jwtService;
 
     @GetMapping("/sign-in")
     public DataResponseDto<Object> loginWithProviderToken(
@@ -43,5 +45,10 @@ public class OAuthController {
         @RequestBody UserDto userDto
     ) {
         return DataResponseDto.of(oAuthService.signUp(userDto, providerAccessToken));
+    }
+
+    @GetMapping("/reissue")
+    public DataResponseDto<Object> reissueJwt(@RequestBody JwtDto jwtDto) {
+        return DataResponseDto.of(jwtService.reissueJwt(jwtDto));
     }
 }
