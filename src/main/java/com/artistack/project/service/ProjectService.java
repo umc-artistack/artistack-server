@@ -1,48 +1,43 @@
 package com.artistack.project.service;
 
+import com.artistack.base.GeneralException;
+import com.artistack.base.constant.Code;
+import com.artistack.instrument.domain.Instrument;
+import com.artistack.instrument.domain.ProjectInstrument;
+import com.artistack.instrument.dto.InstrumentDto;
+import com.artistack.instrument.repository.InstrumentRepository;
 import com.artistack.instrument.repository.ProjectInstrumentRepository;
 import com.artistack.project.domain.Project;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.repository.ProjectRepository;
+import com.artistack.user.domain.User;
+import com.artistack.user.dto.UserDto;
+import com.artistack.user.repository.UserRepository;
+import com.artistack.util.SecurityUtil;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.artistack.base.GeneralException;
-import com.artistack.base.constant.Code;
-
-import java.io.IOException;
-import java.util.List;
-
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.stream.Collectors;
-
 @Slf4j
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 @Transactional
 public class ProjectService {
 
-    private final ProjectRepository projectRepository;
-    private final ProjectInstrumentRepository projectInstrumentRepository;
     private final S3UploaderService s3UploaderService;
-
-    // 초기 값 설정
-//    @PostConstruct
-//    public void initialize() {
-//        List<String> videoUrls = List.of("https://...", "https://...", "https://...", "https://...", "https://...",
-//                "https://...", "https://...", "https://...");
-//        List<String> titles = List.of("제목1", "제목2", "제목3", "제목4", "제목5", "제목6", "제목7");
-//        List<String> descriptions = List.of("설명1", "설명2", "설명3", "설명4", "설명5", "설명6", "설명7");
-//
-//        for (int i = 1; i < videoUrls.size(); i++) {
-//            projectRepository.save(
-//                    Project.builder().id((long) i).videoUrl(videoUrls.get(i)).title(titles.get(i)).description(descriptions.get(i))
-//                            .isStackable(Boolean.TRUE).scope("ALL").codeFlow("A Dm F").bpm(100).viewCount(1)
-//                            .prevProjectId((long)i).build());
-//        }
-//    }
+    private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
+    private final InstrumentRepository instrumentRepository;
+    private final ProjectInstrumentRepository projectInstrumentRepository;
 
     // 프로젝트 전체 조회
     public List<ProjectDto> getAll() {
@@ -51,21 +46,21 @@ public class ProjectService {
 
     // 프로젝트 정보 조회
     public List<ProjectDto> getById(Long projectId) {
-        return projectRepository.findById(projectId).stream().map(project -> ProjectDto.getProject(project, projectInstrumentRepository))
-                .collect(Collectors.toList());
+        return projectRepository.findById(projectId).stream()
+            .map(project -> ProjectDto.getProject(project, projectInstrumentRepository))
+            .collect(Collectors.toList());
     }
 
-
     // 프로젝트 게시
+    @Transactional
     public String insertProject(Long prevProjectId, MultipartFile video, ProjectDto projectDto) {
-        System.out.println("ProjectService - insertProject Method");
 
-        Boolean isInitial = prevProjectId.equals(0L);
+        boolean isInitial = prevProjectId.equals(0L);
 
         // validaiton: 최초 프로젝트가 아닐 경우
         if (!isInitial) {
             // 1. 이전 프로젝트가 존재하는가?
-            if (!projectRepository.findById(prevProjectId).isPresent()) {
+            if (projectRepository.findById(prevProjectId).isEmpty()) {
                 throw new GeneralException(Code.PREV_PROJECT_NOT_EXIST, "이전 프로젝트가 존재하지 않습니다.");
             }
 
@@ -78,7 +73,20 @@ public class ProjectService {
         try {
             // 동영상을 S3에 저장한 후 URL을 가져옴
             String videoUrl = s3UploaderService.uploadFile(video);
-            Project project = projectRepository.save(projectDto.toEntity(videoUrl, prevProjectId));
+//            String videoUrl = "테스트";
+
+            List<InstrumentDto> instruments = projectDto.getInstruments();
+
+            User user = userRepository.findById(SecurityUtil.getUserId())
+                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+
+            Project project = projectRepository.save(projectDto.toEntity(videoUrl, prevProjectId, user));
+
+            for (InstrumentDto instrumentDto : instruments) {
+                Instrument instrument = instrumentRepository.findById(instrumentDto.getId())
+                    .orElseThrow(() -> new GeneralException(Code.INVALID_INSTRUMENT, "올바른 악기를 선택해주세요."));
+                projectInstrumentRepository.save(instrumentDto.toEntity(project, instrument));
+            }
 
             return project.getVideoUrl();
 
@@ -89,7 +97,79 @@ public class ProjectService {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
+//            throw e;
         }
     }
-}
 
+    // 스택 조회 - 다음 스택인지, 이전 스택인지 선택
+    public List<UserDto> getStackers(Long projectId, String sequence) {
+        if (sequence.equals("prev")) {
+            return getPrevStackers(projectId);
+        } else {
+            return getNextStackers(projectId);
+        }
+    }
+
+    // 이전에 스택을 쌓은 유저 목록(이전 스택) 조회
+    public List<UserDto> getPrevStackers(Long projectId) {
+        // while문을 이용하여 prevProjectId = 0(최초 프로젝트)이 될 때까지 스택 조회
+        ArrayList<UserDto> stackers = new ArrayList<>();
+
+        Long prevProjectId = projectRepository.findById(projectId)
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."))
+            .getPrevProjectId();
+
+        while (prevProjectId != 0) {
+            Project project = projectRepository.findById(prevProjectId)
+                .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+
+            User user = project.getUser();
+
+            List<InstrumentDto> instruments = getInstrumentDtoFromProject(project);
+
+            UserDto userDto = UserDto.stackResponse(user, instruments);
+            stackers.add(userDto);
+
+            prevProjectId = project.getPrevProjectId();
+        }
+
+        return stackers;
+    }
+
+    // 현재 스택 위에 스택을 쌓은 유저 목록(다음 스택) 조회
+    public List<UserDto> getNextStackers(Long projectId) {
+        ArrayList<UserDto> stackers = new ArrayList<>();
+
+        // prevProjectId가 projectId인 자식 노드들 반환
+        // 1. prevProjectId가 projectId인 프로젝트들을 찾아
+        List<Project> projects = projectRepository.findAllByPrevProjectId(projectId);
+
+        for (Project project : projects) {
+            Long userId = project.getUser().getId();
+
+            List<InstrumentDto> instruments = getInstrumentDtoFromProject(project);
+
+            // userDto는 ListInstrumentDto(id, name, imgUrl인데 id만 반환할거임)를 사용
+            User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+            UserDto userDto = UserDto.stackResponse(user, instruments);
+            stackers.add(userDto);
+        }
+
+        return stackers;
+
+    }
+
+    // 스택 조회 메서드(getPrevStackers, getNextStackers)에서 중복되는 부분 모듈화
+    // Project > InstrumentDto
+    private List<InstrumentDto> getInstrumentDtoFromProject(Project project) {
+        List<ProjectInstrument> projectInstrumentList = project.getInstruments();
+
+        List<InstrumentDto> instruments = new ArrayList<>();
+        for (ProjectInstrument projectInstrument : projectInstrumentList) {
+            instruments.add(InstrumentDto.response(projectInstrument.getInstrument()));
+        }
+
+        return instruments;
+    }
+}

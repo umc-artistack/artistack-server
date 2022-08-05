@@ -37,8 +37,6 @@ public enum Code {
     KAKAO_SERVER_ERROR(4002, HttpStatus.INTERNAL_SERVER_ERROR , "Kakao server error"),
     APPLE_SERVER_ERROR(4003, HttpStatus.INTERNAL_SERVER_ERROR , "Apple server error"),
     S3_UPLOAD_ERROR(4004, HttpStatus.INTERNAL_SERVER_ERROR, "S3 upload error"),
-    USER_NOT_FOUND(4005, HttpStatus.INTERNAL_SERVER_ERROR, "User not found"),
-
 
 
     UNAUTHORIZED(5000, HttpStatus.UNAUTHORIZED, "User unauthorized"),
@@ -57,6 +55,10 @@ public enum Code {
     DESCRIPTION_TOO_LONG(2203, HttpStatus.BAD_REQUEST, "Description is too long"),
     PREV_PROJECT_NOT_EXIST(2204, HttpStatus.BAD_REQUEST, "Previous project doesn't exist"),
     PREV_PROJECT_NOT_STACKABLE(2205, HttpStatus.BAD_REQUEST, "Previous project isn't stackable"),
+    INVALID_SEQUENCE(2206, HttpStatus.BAD_REQUEST, "Invalid sequence"),
+    PROJECT_NOT_FOUND(2207, HttpStatus.BAD_REQUEST, "Cannot find project from DB"),
+    INVALID_INSTRUMENT(2301, HttpStatus.BAD_REQUEST, "Invalid instrument"),
+    USER_NOT_FOUND(4100, HttpStatus.BAD_REQUEST, "Cannot find user from DB"),
     ;
 
 

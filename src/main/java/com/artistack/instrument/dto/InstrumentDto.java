@@ -1,6 +1,8 @@
 package com.artistack.instrument.dto;
 
 import com.artistack.instrument.domain.Instrument;
+import com.artistack.instrument.domain.ProjectInstrument;
+import com.artistack.project.domain.Project;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +26,13 @@ public class InstrumentDto {
             .id(instrument.getId())
             .name(instrument.getName())
             .imgUrl(instrument.getImgUrl())
+            .build();
+    }
+
+    public ProjectInstrument toEntity(Project project, Instrument instrument) {
+        return ProjectInstrument.builder()
+            .project(project)
+            .instrument(instrument)
             .build();
     }
 }

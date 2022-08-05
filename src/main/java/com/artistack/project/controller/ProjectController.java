@@ -5,13 +5,23 @@ import com.artistack.base.constant.Code;
 import com.artistack.base.dto.DataResponseDto;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.service.ProjectService;
+import com.artistack.user.dto.UserDto;
+import com.artistack.util.SecurityUtil;
+import io.swagger.annotations.ApiImplicitParams;
 import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+
+
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,7 +36,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/projects")
 public class ProjectController {
-
     private final ProjectService projectService;
 
     /**
@@ -40,7 +49,7 @@ public class ProjectController {
 
     /**
      *  프로젝트 정보 조회 API - 셀리나
-     *  [Post] /projects/{projectId}
+     *  [Get] /projects/{projectId}/info
      */
     @ApiOperation(value = "프로젝트 정보 조회")
     @GetMapping("/{id}/info")
@@ -51,18 +60,48 @@ public class ProjectController {
     }
 
     /**
+     *  스택 조회 API - 제이
+     *  [Get] /projects/{projectId}/prev
+     *  [Get] /projects/{projectId}/next
+     */
+    @ApiOperation(value = "스택 조회")
+    @ApiImplicitParams( value = {
+        @ApiImplicitParam(name = "projectId", value = "현재 프로젝트 id", required = true, dataType = "long", paramType = "path"),
+        @ApiImplicitParam(name = "sequence", value = "순서(prev or next)", required = true, dataType = "string", paramType = "path")})
+    @GetMapping("/{projectId}/{sequence}")
+    public DataResponseDto<Object> getStack(@PathVariable Long projectId, @PathVariable String sequence) {
+        // validation
+        // 1. query parameter가 next, prev를 제외한 다른 값이 들어올 경우
+        if (!(sequence.equals("next") || sequence.equals("prev"))) {
+            throw new GeneralException(Code.INVALID_SEQUENCE, "sequence는 prev나 next만 사용할 수 있습니다.");
+        }
+
+        try {
+            List<UserDto> stackers = projectService.getStackers(projectId, sequence);
+
+            return DataResponseDto.of(stackers);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    /**
      *  프로젝트 게시 API - 제이
      *  [Post] /projects/{prevProjectId}
      */
-    @PostMapping("/{prevProjectId}")
+    @ApiOperation(
+        value = "프로젝트 등록",
+        notes = "이전 프로젝트가 없는 경우 prevProjectId를 0으로 해주세요"
+    )
+    @ApiImplicitParam(name = "prevProjectId", value = "이전 프로젝트 id", dataType = "long", defaultValue = "0")
+    @PostMapping(value = "/{prevProjectId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public DataResponseDto<Object> uploadProject(
         @PathVariable Long prevProjectId,
         @RequestPart(value = "video") MultipartFile video,
-        @RequestPart(value = "dto") ProjectDto projectDto
+        @RequestPart(value = "dto") @Parameter(schema =@Schema(type = "string", format = "binary")) ProjectDto projectDto
         ) {
-
-        // TODO: 유저 인덱스 저장하는 로직 만들기
-
         // validation: 비디오 파일이 비어 있을 경우
         if (video.isEmpty()) {
             throw new GeneralException(Code.EMPTY_VIDEO, "비디오 파일이 비어있습니다.");
