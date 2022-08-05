@@ -5,22 +5,14 @@ import com.artistack.base.constant.Code;
 import com.artistack.base.dto.DataResponseDto;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.service.ProjectService;
-<<<<<<< HEAD
-=======
 import com.artistack.user.dto.UserDto;
 import io.swagger.annotations.ApiImplicitParams;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 
->>>>>>> 608515212c71ddb2cb8dadaea3f6438b08630231
-
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
-<<<<<<< HEAD
-import lombok.RequiredArgsConstructor;
-=======
->>>>>>> 608515212c71ddb2cb8dadaea3f6438b08630231
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

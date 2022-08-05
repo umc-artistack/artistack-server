@@ -3,6 +3,7 @@ package com.artistack.project.dto;
 import com.artistack.instrument.domain.ProjectInstrument;
 import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.ProjectInstrumentRepository;
+import com.artistack.project.constant.Scope;
 import com.artistack.project.domain.Project;
 import com.artistack.user.domain.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -32,7 +33,7 @@ public class ProjectDto {
 
     private String codeFlow;
 
-    private Integer scope;
+    private Scope scope;
 
     private Boolean isStackable;
 
@@ -100,7 +101,7 @@ public class ProjectDto {
     }
 
     public static ProjectDto insertProject(String title, String description, String bpm, String codeFlow,
-        List<InstrumentDto> instruments, Integer scope, Boolean isStackable) {
+        List<InstrumentDto> instruments, Scope scope, Boolean isStackable) {
         return ProjectDto.builder()
             .title(title)
             .description(description)

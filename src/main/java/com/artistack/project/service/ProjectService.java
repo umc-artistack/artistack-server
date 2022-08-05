@@ -16,11 +16,7 @@ import com.artistack.user.repository.UserRepository;
 import com.artistack.util.SecurityUtil;
 import java.io.IOException;
 import com.artistack.user.dto.UserDto;
-import com.artistack.user.repository.UserRepository;
-import com.artistack.util.SecurityUtil;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -57,7 +53,7 @@ public class ProjectService {
 
         boolean isInitial = prevProjectId.equals(0L);
 
-        // validaiton: 최초 프로젝트가 아닐 경우
+        // validation: 최초 프로젝트가 아닐 경우
         if (!isInitial) {
             // 1. 이전 프로젝트가 존재하는가?
             if (projectRepository.findById(prevProjectId).isEmpty()) {

@@ -3,6 +3,7 @@ package com.artistack.controller;
 import com.artistack.base.constant.Code;
 
 import com.artistack.instrument.dto.InstrumentDto;
+import com.artistack.project.constant.Scope;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.repository.ProjectRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,6 +43,7 @@ class ProjectControllerTest extends BaseControllerTest {
             put("artistackId", "hahaha");
             put("nickname", "hahaha");
             put("description", "테스트입니다");
+            put("profileImgUrl", "www.naver.com");
             put("providerType", "TEST");
             put("instruments", new ArrayList<>() {{
                 instrumentIds.forEach(id ->
@@ -68,7 +70,7 @@ class ProjectControllerTest extends BaseControllerTest {
     @Test
     @DisplayName("등록 - 최초")
     void uploadInitialTest() throws Exception {
-        uploadProject(accessToken, 0,1, true, Code.OK.getCode());
+        uploadProject(accessToken, 0,Scope.PUBLIC, true, Code.OK.getCode());
     }
 
     @Test
@@ -76,21 +78,10 @@ class ProjectControllerTest extends BaseControllerTest {
     void uploadTest() throws Exception {
         uploadInitialTest();
         Integer projectCnt = Long.valueOf(projectRepository.count()).intValue();
-        uploadProject(accessToken, projectCnt, 1, true, Code.OK.getCode());
+        uploadProject(accessToken, projectCnt, Scope.PUBLIC, true, Code.OK.getCode());
     }
 
-    /**
-     * TODO: 이전 프로젝트가 없는데 쌓을 경우
-     * TODO: 이전 프로젝트가 스택 비허용인데 쌓을 경우
-      */
-    
-//    @Test
-//    @DisplayName("스택 실패 - 이전 프로젝트 없음")
-//    void stackFailWithoutPrev() throws Exception {
-//        uploadProject(accessToken, 99, 1, true, Code.PREV_PROJECT_NOT_EXIST.getCode());
-//    }
-
-    String uploadProject(String accessToken, Integer prev, Integer scope, Boolean isStackable, int code) throws Exception {
+    String uploadProject(String accessToken, Integer prev, Scope scope, Boolean isStackable, int code) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         MockMultipartFile video = new MockMultipartFile("video", "test.mp4", "video/mpeg",
             new FileInputStream(System.getProperty("user.dir") + "/src/main/resources/test.mp4"));
@@ -120,7 +111,7 @@ class ProjectControllerTest extends BaseControllerTest {
             .file(video)
             .file(dto)
             .header("Authorization", "Bearer " + accessToken)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
         )
             .andExpect(jsonPath("$.code").value(code))
             .andReturn();
@@ -128,6 +119,18 @@ class ProjectControllerTest extends BaseControllerTest {
         Map map = gson.fromJson(res.getResponse().getContentAsString(), Map.class);
 
         return map.get("data").toString();
+    }
+
+    @Test
+    @DisplayName("스택 조회 - 다음 스택")
+    void getNextStack() throws Exception {
+
+    }
+
+    @Test
+    @DisplayName("스택 조회 - 이전 스택")
+    void getPrevStack() throws Exception {
+
     }
 
 }
