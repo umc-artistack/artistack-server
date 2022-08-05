@@ -72,10 +72,10 @@ public class ProjectController {
         return DataResponseDto.of(projectService.getByConditionWithPaging(pageable, artistackId));
     }
     /**
-     *  조건, 페이징과 함께 프로젝트 정보 조회 API - 메이슨
-     *  [Get] /projects/search
+     *  페이징과 함께 나의 프로젝트 정보 조회 API - 메이슨
+     *  [Get] /projects/me
      */
-    @ApiOperation(value = "조건, 페이징과 함께 프로젝트 정보 조회")
+    @ApiOperation(value = "페이징과 함께 나의 프로젝트 정보 조회")
     @GetMapping("/me")
     public DataResponseDto<Object> getMyProjectsByConditionWithPaging(
         Pageable pageable
