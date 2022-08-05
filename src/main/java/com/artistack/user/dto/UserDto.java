@@ -1,8 +1,10 @@
 package com.artistack.user.dto;
 
 import static com.artistack.user.constant.UserConstraint.ARTISTACK_ID_MAX_LENGTH;
+import static com.artistack.user.constant.UserConstraint.ARTISTACK_ID_MIN_LENGTH;
 import static com.artistack.user.constant.UserConstraint.DESCRIPTION_MAX_LENGTH;
 import static com.artistack.user.constant.UserConstraint.NICKNAME_MAX_LENGTH;
+import static com.artistack.user.constant.UserConstraint.NICKNAME_MIN_LENGTH;
 import static org.apache.logging.log4j.util.Strings.isBlank;
 
 import com.artistack.base.GeneralException;
@@ -21,10 +23,12 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
 @Builder
 @AllArgsConstructor
+@Slf4j
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
 
@@ -90,29 +94,37 @@ public class UserDto {
     }
 
     private String validateArtistackId(String str) {
-        // artistack id nullable, 길이 검사
-        if (isBlank(str) || str.contains(" ") || str.length() > ARTISTACK_ID_MAX_LENGTH.getKey()) {
-            throw new GeneralException(Code.ARTISTACK_ID_FORMAT_ERROR);
+        String regex = String.format("^[a-z0-9_]{%s,%s}$", ARTISTACK_ID_MIN_LENGTH.getKey(),
+            ARTISTACK_ID_MAX_LENGTH.getKey());
+
+        if (isBlank(str) || !str.matches(regex)) { // format 검사
+            throw new GeneralException(Code.ARTISTACK_ID_FORMAT_ERROR, str);
         }
-        if (userRepository.findByArtistackId(str).isPresent()) {
-            throw new GeneralException(Code.ARTISTACK_ID_DUPLICATED);
+
+        if (userRepository.findByArtistackId(str).isPresent()) { // 중복 여부 검사
+            throw new GeneralException(Code.ARTISTACK_ID_DUPLICATED, str);
         }
+
         return str;
     }
 
     private String validateNickname(String str) {
-        // nickname nullable, 길이 검사
-        if (isBlank(str) || str.contains(" ") || str.length() > NICKNAME_MAX_LENGTH.getKey()) {
-            throw new GeneralException(Code.NICKNAME_FORMAT_ERROR);
+        String regex = String.format("^[^\\s]{%s,%s}$", NICKNAME_MIN_LENGTH.getKey(), NICKNAME_MAX_LENGTH.getKey());
+
+        if (isBlank(str) || !str.matches(regex)) { // format 검사
+            throw new GeneralException(Code.NICKNAME_FORMAT_ERROR, str);
         }
+
         return str;
     }
 
     private String validateDescription(String str) {
-        // description 길이 검사
-        if (!isBlank(str) && str.length() > DESCRIPTION_MAX_LENGTH.getKey()) {
-            throw new GeneralException(Code.USER_DESCRIPTION_FORMAT_ERROR);
+        String regex = String.format(".{0,%s}$", DESCRIPTION_MAX_LENGTH.getKey());
+
+        if (!isBlank(str) && !str.matches(regex)) {
+            throw new GeneralException(Code.USER_DESCRIPTION_FORMAT_ERROR, description);
         }
+
         return str;
     }
 }

@@ -43,9 +43,8 @@ public class UserService {
     }
 
     public UserDto getMe() {
-        return get(SecurityUtil.getMyId());
+        return get(SecurityUtil.getUserId());
     }
-
 
     /**
      * 메이슨) 내 정보를 업데이트합니다
@@ -54,7 +53,7 @@ public class UserService {
      * @return 업데이트된 유저 정보
      */
     public UserDto updateMe(UserDto userDto) {
-        User me = getUser(SecurityUtil.getMyId());
+        User me = getUser(SecurityUtil.getUserId());
         me = userRepository.save(userDto.updateEntity(me, userRepository));
         return UserDto.baseResponse(me);
     }
@@ -84,7 +83,7 @@ public class UserService {
     }
 
     public Boolean deleteMe() {
-        return delete(SecurityUtil.getMyId());
+        return delete(SecurityUtil.getUserId());
     }
 
 
