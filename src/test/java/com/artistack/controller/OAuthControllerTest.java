@@ -15,6 +15,7 @@ import com.artistack.jwt.repository.JwtRepository;
 import com.artistack.oauth.dto.KakaoAccountDto;
 import com.artistack.oauth.repository.KakaoAccountRepository;
 import com.artistack.user.domain.User;
+import com.artistack.user.dto.UserDto;
 import com.artistack.user.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -125,8 +126,9 @@ class OAuthControllerTest extends BaseControllerTest {
     @Test
     @DisplayName("가입 안한 상태에서 카카오로 로그인")
     void signInWithKakaoNotRegisteredTest() throws Exception {
-        KakaoAccountDto res = (KakaoAccountDto) signInWithKakao(Code.NOT_REGISTERED.getCode());
-        then(res.getId()).isNotNull();
+        UserDto res = (UserDto) signInWithKakao(Code.NOT_REGISTERED.getCode());
+        then(res.getNickname()).isNotNull();
+        then(res.getProfileImgUrl()).isNotNull();
     }
 
     Object signInWithKakao(int code) throws Exception {
@@ -142,7 +144,7 @@ class OAuthControllerTest extends BaseControllerTest {
         if (code == Code.OK.getCode()) {
             return gson.fromJson(gson.toJsonTree(map.get("data")), JwtDto.class);
         }
-        return gson.fromJson(gson.toJsonTree(map.get("data")), KakaoAccountDto.class);
+        return gson.fromJson(gson.toJsonTree(map.get("data")), UserDto.class);
     }
 
     @EnabledIf("iskakaoTokenPresent")

@@ -62,7 +62,7 @@ public class OAuthService {
                 KakaoAccountDto kakaoAccountDto = getKakaoAccount(providerAccessToken);
                 user = kakaoAccountRepository.findById(kakaoAccountDto.getId()).map(KakaoAccount::getUser);
                 if (user.isEmpty()) {
-                    return kakaoAccountDto;
+                    return kakaoAccountDto.toUserDto();
                 }
                 break;
             case APPLE:
