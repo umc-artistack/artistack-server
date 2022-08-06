@@ -3,6 +3,7 @@ package com.artistack.controller;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import org.junit.jupiter.api.Disabled;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 
 
@@ -29,7 +30,8 @@ class UploadControllerTest extends BaseControllerTest {
     @Test
     @DisplayName("단일 파일 업로드")
     void uploadFileTest() throws Exception {
-        uploadFile("/profile", Code.OK.getCode());
+        String res = uploadFile("/profile", Code.OK.getCode());
+        then(res.length()).isGreaterThan(5);
     }
 
     String uploadFile(String path, int code) throws Exception {

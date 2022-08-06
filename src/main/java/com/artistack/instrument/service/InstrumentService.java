@@ -34,9 +34,9 @@ public class InstrumentService {
 
     @PostConstruct
     public void initialize() {
-        List<String> names = List.of("보컬", "피아노", "드럼", "기타", "베이스", "신디사이저", "바이올린", "기타");
+        List<String> names = List.of("보컬", "피아노", "드럼", "기타", "베이스", "기타");
         List<String> imgUrls = List.of("https://...", "https://...", "https://...", "https://...", "https://...",
-            "https://...", "https://...", "https://...");
+            "https://...");
 
         for (int i = 1; i < names.size(); i++) {
             instrumentRepository.save(
@@ -60,7 +60,7 @@ public class InstrumentService {
             for (InstrumentDto instrumentDto : instrumentDtos) {
                 Instrument instrument = instrumentRepository.findById(instrumentDto.getId())
                     .orElseThrow(
-                        () -> new GeneralException(Code.INSTRUMENT_NOT_VALID, instrumentDto.getId().toString()));
+                        () -> new GeneralException(Code.INSTRUMENT_ID_NOT_VALID, instrumentDto.getId().toString()));
                 userInstrumentRepository.save(UserInstrument.builder().user(user).instrument(instrument).build());
             }
         }

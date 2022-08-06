@@ -16,11 +16,13 @@ import com.artistack.user.repository.UserRepository;
 import com.artistack.util.SecurityUtil;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @Transactional
 public class ProjectService {
+
     private final S3UploaderService s3UploaderService;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
@@ -43,8 +46,31 @@ public class ProjectService {
 
     // 프로젝트 정보 조회
     public List<ProjectDto> getById(Long projectId) {
-        return projectRepository.findById(projectId).stream().map(project -> ProjectDto.getProject(project, projectInstrumentRepository))
+        return projectRepository.findById(projectId).stream()
+            .map(project -> ProjectDto.getProject(project, projectInstrumentRepository))
             .collect(Collectors.toList());
+    }
+
+    /**
+     * 메이슨) 조건에 맞는 프로젝트들을 페이징 기능과 함께 반환합니다
+     *
+     * @param artistackId 조회할 유저의 artistackId (optional)
+     * @return 조건에 맞는 프로젝트들 (profileResponse)
+     */
+    public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId) {
+        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null))
+            .map(ProjectDto::profileResponse);
+    }
+
+    /**
+     * 메이슨) 내 프로젝트들을 페이징 기능과 함께 반환합니다
+     *
+     * @return 내 프로젝트들 (profileResponse)
+     */
+    public Page<ProjectDto> getMyWithPaging(Pageable pageable) {
+        String artistackId = userRepository.findById(SecurityUtil.getUserId())
+            .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND)).getArtistackId();
+        return getByConditionWithPaging(pageable, Optional.of(artistackId));
     }
 
     // 프로젝트 게시
@@ -80,7 +106,7 @@ public class ProjectService {
 
             for (InstrumentDto instrumentDto : instruments) {
                 Instrument instrument = instrumentRepository.findById(instrumentDto.getId())
-                        .orElseThrow(() -> new GeneralException(Code.INVALID_INSTRUMENT, "올바른 악기를 선택해주세요."));
+                    .orElseThrow(() -> new GeneralException(Code.INVALID_INSTRUMENT, "올바른 악기를 선택해주세요."));
                 projectInstrumentRepository.save(instrumentDto.toEntity(project, instrument));
             }
 
@@ -101,9 +127,7 @@ public class ProjectService {
     public List<UserDto> getStackers(Long projectId, String sequence) {
         if (sequence.equals("prev")) {
             return getPrevStackers(projectId);
-        }
-
-        else {
+        } else {
             return getNextStackers(projectId);
         }
     }
@@ -115,7 +139,7 @@ public class ProjectService {
 
         Long prevProjectId = projectRepository.findById(projectId)
             .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."))
-                .getPrevProjectId();
+            .getPrevProjectId();
 
         while (prevProjectId != 0) {
             Project project = projectRepository.findById(prevProjectId)
@@ -148,7 +172,9 @@ public class ProjectService {
             List<InstrumentDto> instruments = getInstrumentDtoFromProject(project);
 
             // userDto는 ListInstrumentDto(id, name, imgUrl인데 id만 반환할거임)를 사용
-            User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+            User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+
             UserDto userDto = UserDto.stackResponse(user, instruments);
             stackers.add(userDto);
         }
