@@ -31,12 +31,23 @@ public enum Code {
     NICKNAME_FORMAT_ERROR(2105, HttpStatus.BAD_REQUEST, "Nickname format error"),
     INSTRUMENT_ID_NOT_VALID(2106, HttpStatus.BAD_REQUEST, "Instrument id not valid"),
 
+    EMPTY_VIDEO(2201, HttpStatus.BAD_REQUEST, "Video file is empty"),
+    TITLE_TOO_LONG(2202, HttpStatus.BAD_REQUEST, "Title is too long"),
+    DESCRIPTION_TOO_LONG(2203, HttpStatus.BAD_REQUEST, "Description is too long"),
+    PREV_PROJECT_NOT_EXIST(2204, HttpStatus.BAD_REQUEST, "Previous project doesn't exist"),
+    PREV_PROJECT_NOT_STACKABLE(2205, HttpStatus.BAD_REQUEST, "Previous project isn't stackable"),
+    INVALID_SEQUENCE(2206, HttpStatus.BAD_REQUEST, "Invalid sequence"),
+
+    INVALID_INSTRUMENT(2301, HttpStatus.BAD_REQUEST, "Invalid instrument"),
+
 
     INTERNAL_ERROR(4000, HttpStatus.INTERNAL_SERVER_ERROR, "Internal error"),
     DATA_ACCESS_ERROR(4001, HttpStatus.INTERNAL_SERVER_ERROR, "Data access error"),
     KAKAO_SERVER_ERROR(4002, HttpStatus.INTERNAL_SERVER_ERROR , "Kakao server error"),
     APPLE_SERVER_ERROR(4003, HttpStatus.INTERNAL_SERVER_ERROR , "Apple server error"),
     S3_UPLOAD_ERROR(4004, HttpStatus.INTERNAL_SERVER_ERROR, "S3 upload error"),
+    USER_NOT_FOUND(4100, HttpStatus.BAD_REQUEST, "Cannot find user from DB"),
+    PROJECT_NOT_FOUND(4101, HttpStatus.BAD_REQUEST, "Cannot find project from DB"),
 
 
     UNAUTHORIZED(5000, HttpStatus.UNAUTHORIZED, "User unauthorized"),
@@ -48,17 +59,6 @@ public enum Code {
     EXPIRED_JWT(5006, HttpStatus.UNAUTHORIZED, "Jwt expired. Reissue it"),
     UNSUPPORTED_JWT(5007, HttpStatus.UNAUTHORIZED, "Unsupported jwt format"),
     ILLEGAL_JWT(5008, HttpStatus.UNAUTHORIZED, "Illegal jwt format"),
-
-    EMPTY_VIDEO(2201, HttpStatus.BAD_REQUEST, "Video file is empty"),
-
-    TITLE_TOO_LONG(2202, HttpStatus.BAD_REQUEST, "Title is too long"),
-    DESCRIPTION_TOO_LONG(2203, HttpStatus.BAD_REQUEST, "Description is too long"),
-    PREV_PROJECT_NOT_EXIST(2204, HttpStatus.BAD_REQUEST, "Previous project doesn't exist"),
-    PREV_PROJECT_NOT_STACKABLE(2205, HttpStatus.BAD_REQUEST, "Previous project isn't stackable"),
-    INVALID_SEQUENCE(2206, HttpStatus.BAD_REQUEST, "Invalid sequence"),
-    PROJECT_NOT_FOUND(2207, HttpStatus.BAD_REQUEST, "Cannot find project from DB"),
-    INVALID_INSTRUMENT(2301, HttpStatus.BAD_REQUEST, "Invalid instrument"),
-    USER_NOT_FOUND(4100, HttpStatus.BAD_REQUEST, "Cannot find user from DB"),
     ;
 
 

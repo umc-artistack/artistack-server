@@ -1,8 +1,8 @@
 package com.artistack.project.domain;
 
 import com.artistack.config.BaseTimeEntity;
-import com.artistack.instrument.domain.Instrument;
 import com.artistack.instrument.domain.ProjectInstrument;
+import com.artistack.project.constant.Scope;
 import com.artistack.user.domain.User;
 import com.sun.istack.NotNull;
 import java.util.List;
@@ -40,7 +40,8 @@ public class Project extends BaseTimeEntity {
     List<ProjectInstrument> instruments;
 
     @NotNull
-    private Integer scope;
+    @Enumerated
+    private Scope scope;
 
     @NotNull
     private Boolean isStackable;
@@ -60,7 +61,7 @@ public class Project extends BaseTimeEntity {
 
     @Builder
     public Project(Long id, String videoUrl, String title, String description, String bpm, String codeFlow,
-        List<ProjectInstrument> instruments, Integer scope, Boolean isStackable, Long prevProjectId, User user, Integer viewCount) {
+        List<ProjectInstrument> instruments, Scope scope, Boolean isStackable, Long prevProjectId, User user, Integer viewCount) {
         this.id = id;
         this.videoUrl = videoUrl;
         this.title = title;
