@@ -8,8 +8,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @Slf4j
 public class SecurityUtil {
 
-    private SecurityUtil() {
-    }
 
     public static Long getUserId() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

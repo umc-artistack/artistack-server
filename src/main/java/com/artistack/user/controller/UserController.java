@@ -1,83 +1,61 @@
 package com.artistack.user.controller;
 
 import com.artistack.base.dto.DataResponseDto;
-import com.artistack.base.GeneralException;
-import com.artistack.base.constant.Code;
+import com.artistack.user.dto.UserDto;
+import com.artistack.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 @Slf4j
 public class UserController {
 
-    // http://localhost:8080/user
-    @GetMapping(path = "")
-    public DataResponseDto<Object> get() {
-        return DataResponseDto.of(List.of(1, 2, 3));
-        /*
-          {
-            "success": true,
-            "code": 0,
-            "message": "Ok",
-            "data": [
-              1,
-              2,
-              3
-            ]
-          }
-         */
+    private final UserService userService;
+
+    // 메이슨) 내 정보를 불러옵니다
+    @GetMapping(path = "/me")
+    public DataResponseDto<Object> getMe() {
+        return DataResponseDto.of(userService.getMe());
     }
 
-
-    // http://localhost:8080/user/error/custom
-    @GetMapping(path = "/error/custom")
-    public DataResponseDto<Object> errorWithCustomException() {
-        Boolean isValid = false;
-
-        if (!isValid) {
-            // exception occurs
-            throw new GeneralException(Code.VALIDATION_ERROR, "Reason why it isn't valid");
-            /*
-              {
-                "success": false,
-                "code": 10001,
-                "message": "Validation error - Reason why it isn't valid"
-              }
-            */
-        }
-
-        return DataResponseDto.empty();
+    // 메이슨) artistack id로 타 유저 정보를 불러옵니다
+    @GetMapping(path = "/{artistackId}")
+    public DataResponseDto<Object> getUser(@PathVariable String artistackId) {
+        return DataResponseDto.of(userService.getByArtistackId(artistackId));
     }
 
+    // 메이슨) 내 정보를 수정합니다
+    @PatchMapping(path = "/me")
+    public DataResponseDto<Object> updateMe(
+        @RequestBody UserDto userDto
+    ) {
+        return DataResponseDto.of(userService.updateMe(userDto));
+    }
 
-    // http://localhost:8080/user/error/exception
-    @GetMapping(path = "/error/exception")
-    public DataResponseDto<Object> errorWithException() {
-        try {
-            List<Integer> list = List.of(1, 2, 3, 4, 5);
+    // 메이슨) 회원 탈퇴를 진행합니다
+    @DeleteMapping(path = "/me")
+    public DataResponseDto<Object> deleteMe(
+    ) {
+        return DataResponseDto.of(userService.deleteMe());
+    }
 
-            log.debug(list.get(99999).toString()); // outofbound exception occurs
-
-        } catch (Exception e) {
-            log.trace("Exception", e);
-            throw e;
-                /*
-                  {
-                    "success": false,
-                    "code": 20000,
-                    "message": "Internal error - Index 9 out of bounds for length 5"
-                  }
-                */
-        }
-
-        return DataResponseDto.empty();
+    // 메이슨) 유저 정보 중복 여부를 체크합니다
+    @GetMapping(path = "/duplicate")
+    public DataResponseDto<Object> checkDuplicate(
+        @RequestParam("type") String type,
+        @RequestParam("value") String value
+    ) {
+        return DataResponseDto.of(type.equals("artistackId") && userService.isArtistackIdDuplicated(value));
     }
 }

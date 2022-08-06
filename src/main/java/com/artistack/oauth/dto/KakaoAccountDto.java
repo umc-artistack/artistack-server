@@ -1,5 +1,6 @@
 package com.artistack.oauth.dto;
 
+import com.artistack.user.dto.UserDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
@@ -25,5 +26,12 @@ public class KakaoAccountDto {
             private String nickname;
             private String profile_image_url;
         }
+    }
+
+    public UserDto toUserDto() {
+        return UserDto.builder()
+            .profileImgUrl(kakao_account.getProfile().getProfile_image_url())
+            .nickname(kakao_account.getProfile().getNickname())
+            .build();
     }
 }

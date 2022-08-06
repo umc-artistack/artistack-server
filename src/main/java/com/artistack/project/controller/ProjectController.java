@@ -6,8 +6,10 @@ import com.artistack.base.dto.DataResponseDto;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.service.ProjectService;
 import com.artistack.user.dto.UserDto;
+import com.artistack.util.SecurityUtil;
 import io.swagger.annotations.ApiImplicitParams;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 import io.swagger.annotations.ApiImplicitParam;
@@ -17,11 +19,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -53,6 +57,30 @@ public class ProjectController {
             @PathVariable Long id
     )  {
         return DataResponseDto.of(projectService.getById(id));
+    }
+
+    /**
+     *  조건, 페이징과 함께 프로젝트 정보 조회 API - 메이슨
+     *  [Get] /projects/search
+     */
+    @ApiOperation(value = "조건, 페이징과 함께 프로젝트 정보 조회")
+    @GetMapping("/search")
+    public DataResponseDto<Object> getProjectsByConditionWithPaging(
+        Pageable pageable,
+        @RequestParam Optional<String> artistackId
+    ) {
+        return DataResponseDto.of(projectService.getByConditionWithPaging(pageable, artistackId));
+    }
+    /**
+     *  페이징과 함께 나의 프로젝트 정보 조회 API - 메이슨
+     *  [Get] /projects/me
+     */
+    @ApiOperation(value = "페이징과 함께 나의 프로젝트 정보 조회")
+    @GetMapping("/me")
+    public DataResponseDto<Object> getMyProjectsByConditionWithPaging(
+        Pageable pageable
+    ) {
+        return DataResponseDto.of(projectService.getMyWithPaging(pageable));
     }
 
     /**

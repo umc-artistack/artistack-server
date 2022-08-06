@@ -56,4 +56,12 @@ public class User extends BaseTimeEntity {
         this.profileImgUrl = profileImgUrl;
         this.providerType = providerType;
     }
+
+    public void withdraw() {
+        artistackId = null;
+        nickname = null;
+        description = null;
+        profileImgUrl = null;
+        role = Role.WITHDRAWAL;
+    }
 }

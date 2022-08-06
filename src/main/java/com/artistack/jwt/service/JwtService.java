@@ -41,7 +41,7 @@ public class JwtService {
 
         jwtRepository.delete(jwt);
 
-        User user = userRepository.findById(userId).get();
+        User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND));
         JwtDto newJwtDto = tokenProvider.generateJwt(user);
         Jwt newJwt = Jwt.builder().user(user).refreshToken(newJwtDto.getRefreshToken()).build();
         jwtRepository.save(newJwt);
