@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
-
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,10 +31,12 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-@Api(tags = "Projects")
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/projects")
+@Slf4j
+@Api(tags = "프로젝트 관련 API ")
 public class ProjectController {
     private final ProjectService projectService;
 
@@ -43,7 +45,7 @@ public class ProjectController {
      *  [GET] /projects
      *  후순위 개발
      */
-    @ApiOperation(value = "프로젝트 전체 조회")
+    @ApiOperation(value = "프로젝트 전체 조회", notes = "DB에 저장된 모든 프로젝트들을 조회합니다.")
     @GetMapping("")
     public DataResponseDto<Object> getAllProjects() { return DataResponseDto.of(projectService.getAll()); }
 
@@ -51,7 +53,8 @@ public class ProjectController {
      *  프로젝트 정보 조회 API - 셀리나
      *  [Get] /projects/{projectId}/info
      */
-    @ApiOperation(value = "프로젝트 정보 조회")
+    @ApiOperation(value = "프로젝트 정보 조회", notes = "단일 프로젝트를 조회합니다. id에 프로젝트 아이디를 입력해주세요.")
+    @ApiImplicitParam(name = "id", value = "정보를 조회할 프로젝트 id", required = true, dataType = "long", paramType = "path")
     @GetMapping("/{id}/info")
     public DataResponseDto<Object> getProject(
             @PathVariable Long id
@@ -91,7 +94,7 @@ public class ProjectController {
     @ApiOperation(value = "스택 조회")
     @ApiImplicitParams( value = {
         @ApiImplicitParam(name = "projectId", value = "현재 프로젝트 id", required = true, dataType = "long", paramType = "path"),
-        @ApiImplicitParam(name = "sequence", value = "순서(prev or next)", required = true, dataType = "string", paramType = "path")})
+        @ApiImplicitParam(name = "sequence", value = "순서 (prev와 next만 가능)", required = true, dataType = "string", paramType = "path")})
     @GetMapping("/{projectId}/{sequence}")
     public DataResponseDto<Object> getStack(@PathVariable Long projectId, @PathVariable String sequence) {
         // validation
@@ -117,10 +120,12 @@ public class ProjectController {
      */
     @ApiOperation(
         value = "프로젝트 등록",
-        notes = "이전 프로젝트가 없는 경우 prevProjectId를 0으로 해주세요"
+        notes = "최초 프로젝트 등록일 경우, prevProjectId를 0으로 해주세요. 다른 프로젝트 위에 프로젝트를 쌓는 경우, 해당 프로젝트의 id를 입력해주세요.<br>"
+            + "번거롭지만 dto는 .json 파일로 업로드해주세요..! 포스트맨에서 테스트할 때는, Content-Type을 application/json으로 설정하여 텍스트로 입력할 수 있습니다.<br>"
+            + "scope는 0부터 시작하며, 숫자, 문자열 중 편한 것을 선택하여 입력해주세요. 0은 전체 공개(PUBLIC), 1은 비공개(PRIVATE)입니다."
     )
-    @ApiImplicitParam(name = "prevProjectId", value = "이전 프로젝트 id", dataType = "long", defaultValue = "0")
-    @PostMapping(value = "/{prevProjectId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ApiImplicitParam(name = "prevProjectId", value = "이전 프로젝트 id", dataType = "integer", defaultValue = "0")
+    @PostMapping(value = "/{prevProjectId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public DataResponseDto<Object> uploadProject(
         @PathVariable Long prevProjectId,
         @RequestPart(value = "video") MultipartFile video,

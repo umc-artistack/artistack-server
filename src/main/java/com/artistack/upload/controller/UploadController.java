@@ -3,6 +3,9 @@ package com.artistack.upload.controller;
 import com.artistack.base.dto.DataResponseDto;
 import com.artistack.upload.dto.UploadDto;
 import com.artistack.upload.service.UploadService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/upload")
 @Slf4j
+@Api(tags = "업로드 관련 API")
 public class UploadController {
 
     private final UploadService uploadService;
@@ -30,6 +34,8 @@ public class UploadController {
      * @param multiple  업로드할 이미지가 여러개인지 여부
      * @return
      */
+    @ApiOperation(value = "이미지 업로드", notes = "이미지를 업로드합니다.")
+    @ApiImplicitParam(name = "path", value = "업로드할 경로", required = true, dataType = "string", paramType = "path", defaultValue = "profile")
     @PostMapping({"{path}", ""})
     public DataResponseDto<Object> upload(
         @ModelAttribute UploadDto uploadDto,
