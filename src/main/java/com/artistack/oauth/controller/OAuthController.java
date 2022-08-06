@@ -8,6 +8,7 @@ import com.artistack.oauth.constant.ProviderType;
 import com.artistack.oauth.service.OAuthService;
 import com.artistack.user.dto.UserDto;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/oauth")
 @Slf4j
+@Api(tags = "OAuth 관련 API ")
 public class OAuthController {
 
     private final OAuthService oAuthService;
@@ -54,6 +56,7 @@ public class OAuthController {
         return DataResponseDto.of(oAuthService.signUp(userDto, providerAccessToken));
     }
 
+    @ApiOperation(value = "JWT 만료 시 재발급")
     @GetMapping("/reissue")
     public DataResponseDto<Object> reissueJwt(@RequestBody JwtDto jwtDto) {
         return DataResponseDto.of(jwtService.reissueJwt(jwtDto));
