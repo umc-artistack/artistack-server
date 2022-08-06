@@ -66,3 +66,7 @@ out/
 !**/src/test/**/out/
 
 HELP.md
+
+aws.yml
+
+application-local.properties

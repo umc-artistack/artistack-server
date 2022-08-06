@@ -19,12 +19,38 @@ repositories {
 }
 
 dependencies {
+	// basic
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'junit:junit:4.13.2'
+
+	// lombok
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'mysql:mysql-connector-java'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// test code
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// swagger
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+	implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+
+	// s3
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+	/*--------- 제이 ---------*/
+	runtimeOnly 'com.h2database:h2'
+
+
+	/*--------- 메이슨 ---------*/
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	implementation 'com.google.code.gson:gson:2.9.0'
+	runtimeOnly 'mysql:mysql-connector-java'
+	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+	// jwt 관련 의존성
+	compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.2'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.2'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.2'
 }
 
 tasks.named('test') {
