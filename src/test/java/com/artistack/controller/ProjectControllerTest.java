@@ -134,12 +134,12 @@ class ProjectControllerTest extends BaseControllerTest {
         int projectCnt = 5, pageSize = 20, otherUserProjectCnt = 2;
         List<String> uploadUrls = new ArrayList<>();
         for (int i = 0; i < projectCnt; i++) {
-            uploadUrls.add(uploadProject(accessToken, 0, 1, true, Code.OK.getCode()));
+            uploadUrls.add(uploadProject(accessToken, 0, Scope.PUBLIC, true, Code.OK.getCode()));
         }
 
         JwtDto jwt = oAuthControllerTest.signUp(oAuthControllerTest.testUserRegisterBody, Code.OK.getCode());
         for (int i = 0; i < otherUserProjectCnt; i++) {
-            uploadProject(jwt.getAccessToken(), 0, 1, true, Code.OK.getCode());
+            uploadProject(jwt.getAccessToken(), 0, Scope.PUBLIC, true, Code.OK.getCode());
         }
 
         List<ProjectDto> res = getProjectsByArtistackId(accessToken,
@@ -181,7 +181,7 @@ class ProjectControllerTest extends BaseControllerTest {
         int projectCnt = 5, pageSize = 3;
         List<String> uploadUrls = new ArrayList<>();
         for (int i = 0; i < projectCnt; i++) {
-            uploadUrls.add(uploadProject(accessToken, 0, 1, true, Code.OK.getCode()));
+            uploadUrls.add(uploadProject(accessToken, 0, Scope.PUBLIC, true, Code.OK.getCode()));
         }
 
         List<ProjectDto> res = getMyProjects(accessToken, pageSize, Code.OK.getCode());
