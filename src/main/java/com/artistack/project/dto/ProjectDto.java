@@ -54,14 +54,13 @@ public class ProjectDto {
     }
 
     // 메이슨
-    // TODO: 좋아요 기능 구현 시 좋아요 수도 반환하도록 수정
     public static ProjectDto profileResponse(Project project) {
         return ProjectDto.builder()
             .id(project.getId())
             .videoUrl(project.getVideoUrl())
             .stackCount(project.getStackCount())
             .viewCount(project.getViewCount())
-            .likeCount(null)
+            .likeCount(project.getLikeCount())
             .build();
     }
 
