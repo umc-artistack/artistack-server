@@ -59,6 +59,9 @@ public class Project extends BaseTimeEntity {
     @Formula("(SELECT count(*) FROM project p where p.prev_project_id = id)")
     private Integer stackCount;
 
+    @Formula("(SELECT count(*) FROM project_like pl where pl.project_id = id)")
+    private Integer likeCount;
+
     @Builder
     public Project(Long id, String videoUrl, String title, String description, String bpm, String codeFlow,
         List<ProjectInstrument> instruments, Scope scope, Boolean isStackable, Long prevProjectId, User user, Integer viewCount) {

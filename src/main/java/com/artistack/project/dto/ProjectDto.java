@@ -73,6 +73,8 @@ public class ProjectDto {
             .instruments(Optional.ofNullable(projectInstrumentRepository).map(
                 e -> e.findByProjectId(project.getId()).stream().map(ProjectInstrument::getInstrument)
                     .map(InstrumentDto::response).collect(Collectors.toList())).orElse(null))
+            .stackCount(project.getStackCount())
+            .likeCount(project.getLikeCount())
             .build();
     }
 
@@ -108,6 +110,8 @@ public class ProjectDto {
             .instruments(Optional.ofNullable(projectInstrumentRepository).map(
                 e -> e.findByProjectId(project.getId()).stream().map(ProjectInstrument::getInstrument)
                     .map(InstrumentDto::response).collect(Collectors.toList())).orElse(null))
+            .stackCount(project.getStackCount())
+            .likeCount(project.getLikeCount())
             .build();
 
     }
