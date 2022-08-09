@@ -37,10 +37,10 @@ public enum Code {
     PREV_PROJECT_NOT_EXIST(2204, HttpStatus.BAD_REQUEST, "Previous project doesn't exist"),
     PREV_PROJECT_NOT_STACKABLE(2205, HttpStatus.BAD_REQUEST, "Previous project isn't stackable"),
     INVALID_SEQUENCE(2206, HttpStatus.BAD_REQUEST, "Invalid sequence"),
+    PROJECT_LIKE_EXIST(2207, HttpStatus.BAD_REQUEST, "Project Like already exist"),
+    PROJECT_LIKE_NOT_EXIST(2208, HttpStatus.BAD_REQUEST, "Project Like doesn't exist"),
 
     INVALID_INSTRUMENT(2301, HttpStatus.BAD_REQUEST, "Invalid instrument"),
-    PROJECT_LIKE_EXIST(2302, HttpStatus.BAD_REQUEST, "Project Like already exist"),
-    PROJECT_LIKE_NOT_EXIST(2303, HttpStatus.BAD_REQUEST, "Project Like doesn't exist"),
 
     INTERNAL_ERROR(4000, HttpStatus.INTERNAL_SERVER_ERROR, "Internal error"),
     DATA_ACCESS_ERROR(4001, HttpStatus.INTERNAL_SERVER_ERROR, "Data access error"),

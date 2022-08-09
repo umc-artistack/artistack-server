@@ -80,11 +80,11 @@ public class ProjectController {
     }
 
     /**
-     *  프로젝트 좋아요 API - 셀리나
+     *  프로젝트 좋아요 등록 API - 셀리나
      *  [Post] /projects/{projectId}/like
      */
     @ApiOperation(
-            value = "프로젝트 좋아요"
+            value = "프로젝트 좋아요 등록"
     )
     @ApiImplicitParam(name = "projectId", value = "프로젝트 id", dataType = "integer")
     @PostMapping(value = "/{projectId}/like")
@@ -92,8 +92,7 @@ public class ProjectController {
             @PathVariable Long projectId
     ) {
         try {
-            Long likeProjectId = projectService.likeProject(projectId);
-            return DataResponseDto.of(likeProjectId);
+            return DataResponseDto.of(projectService.likeProject(projectId));
         } catch (Exception e) {
             e.printStackTrace();
             throw e;

@@ -77,9 +77,9 @@ public class ProjectService {
         return getByConditionWithPaging(pageable, Optional.of(artistackId));
     }
 
-    // 프로젝트 좋아요
+    // 프로젝트 좋아요 등록
     @Transactional
-    public Long likeProject(Long projectId) {
+    public String likeProject(Long projectId) {
         try {
 
             User user = userRepository.findById(SecurityUtil.getUserId())
@@ -94,7 +94,9 @@ public class ProjectService {
 
             ProjectLike projectLike = projectLikeRepository.save(ProjectLike.of(user, project));
 
-            return projectLike.getId();
+            // projectLike.getId();
+
+            return "좋아요 등록이 완료되었습니다.";
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -102,8 +104,8 @@ public class ProjectService {
         }
     }
 
-    // 프로젝트 좋아요 삭제
-    public Boolean deleteLikeProject(Long projectId) {
+    // 프로젝트 좋아요 취소
+    public String deleteLikeProject(Long projectId) {
         User user = userRepository.findById(SecurityUtil.getUserId())
                 .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
 
@@ -116,7 +118,7 @@ public class ProjectService {
 
         projectLikeRepository.deleteByUserAndProject(user,project);
 
-        return true;
+        return "좋아요 취소가 완료되었습니다.";
     }
 
     // 프로젝트 게시
