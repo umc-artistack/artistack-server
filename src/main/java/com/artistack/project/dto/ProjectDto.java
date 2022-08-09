@@ -53,31 +53,6 @@ public class ProjectDto {
 
     }
 
-    public static ProjectDto response(Project project) {
-        return response(project, null);
-    }
-
-    public static ProjectDto response(Project project, ProjectInstrumentRepository projectInstrumentRepository) {
-        return ProjectDto.builder()
-            .id(project.getId())
-            .videoUrl(project.getVideoUrl())
-            .title(project.getTitle())
-            .description(project.getDescription())
-            .isStackable(project.getIsStackable())
-            .scope(project.getScope())
-            .codeFlow(project.getCodeFlow())
-            .bpm(project.getBpm())
-            .viewCount(project.getViewCount())
-            .prevProjectId(project.getPrevProjectId())
-            .user(project.getUser())
-            .instruments(Optional.ofNullable(projectInstrumentRepository).map(
-                e -> e.findByProjectId(project.getId()).stream().map(ProjectInstrument::getInstrument)
-                    .map(InstrumentDto::response).collect(Collectors.toList())).orElse(null))
-            .stackCount(project.getStackCount())
-            .likeCount(project.getLikeCount())
-            .build();
-    }
-
     // 메이슨
     // TODO: 좋아요 기능 구현 시 좋아요 수도 반환하도록 수정
     public static ProjectDto profileResponse(Project project) {
@@ -90,11 +65,11 @@ public class ProjectDto {
             .build();
     }
 
-    public static ProjectDto getProject(Project project) {
-        return getProject(project, null);
+    public static ProjectDto projectResponse(Project project) {
+        return projectResponse(project, null);
     }
 
-    public static ProjectDto getProject(Project project, ProjectInstrumentRepository projectInstrumentRepository) {
+    public static ProjectDto projectResponse(Project project, ProjectInstrumentRepository projectInstrumentRepository) {
         return ProjectDto.builder()
             .id(project.getId())
             .videoUrl(project.getVideoUrl())

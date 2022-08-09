@@ -45,13 +45,13 @@ public class ProjectService {
 
     // 프로젝트 전체 조회
     public List<ProjectDto> getAll() {
-        return projectRepository.findAll().stream().map(ProjectDto::response).collect(Collectors.toList());
+        return projectRepository.findAll().stream().map(ProjectDto::projectResponse).collect(Collectors.toList());
     }
 
     // 프로젝트 정보 조회
     public List<ProjectDto> getById(Long projectId) {
         return projectRepository.findById(projectId).stream()
-            .map(project -> ProjectDto.getProject(project, projectInstrumentRepository))
+            .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository))
             .collect(Collectors.toList());
     }
 
