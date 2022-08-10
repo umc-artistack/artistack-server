@@ -150,8 +150,8 @@ class ProjectControllerTest extends BaseControllerTest {
         }
 
         then(res.size()).isEqualTo(Math.min(projectCnt, pageSize));
-        then(projectRepository.countByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(projectCnt);
-        then(projectRepository.countByArtistackId(
+        then(projectRepository.countPublicByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(projectCnt);
+        then(projectRepository.countPublicByArtistackId(
             oAuthControllerTest.testUserRegisterBody.get("artistackId").toString())).isEqualTo(otherUserProjectCnt);
     }
 
@@ -183,6 +183,7 @@ class ProjectControllerTest extends BaseControllerTest {
         for (int i = 0; i < projectCnt; i++) {
             uploadUrls.add(uploadProject(accessToken, 0, Scope.PUBLIC, true, Code.OK.getCode()));
         }
+        uploadProject(accessToken, 0, Scope.PRIVATE, true, Code.OK.getCode());
 
         List<ProjectDto> res = getMyProjects(accessToken, pageSize, Code.OK.getCode());
 
@@ -191,7 +192,7 @@ class ProjectControllerTest extends BaseControllerTest {
         }
 
         then(res.size()).isEqualTo(Math.min(projectCnt, pageSize));
-        then(projectRepository.countByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(projectCnt);
+        then(projectRepository.countPublicByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(projectCnt);
     }
 
     // 메이슨

@@ -7,6 +7,7 @@ import com.artistack.instrument.domain.ProjectInstrument;
 import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.InstrumentRepository;
 import com.artistack.instrument.repository.ProjectInstrumentRepository;
+import com.artistack.project.constant.Scope;
 import com.artistack.project.domain.Project;
 import com.artistack.project.domain.ProjectLike;
 import com.artistack.project.dto.ProjectDto;
@@ -62,7 +63,7 @@ public class ProjectService {
      * @return 조건에 맞는 프로젝트들 (profileResponse)
      */
     public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId) {
-        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null))
+        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null), Scope.PUBLIC)
             .map(ProjectDto::profileResponse);
     }
 

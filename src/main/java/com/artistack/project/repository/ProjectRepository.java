@@ -1,7 +1,7 @@
 package com.artistack.project.repository;
 
+import com.artistack.project.constant.Scope;
 import com.artistack.project.domain.Project;
-import com.artistack.user.domain.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,11 +24,10 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     Optional<Project> findProjectByPrevProjectId(Long id);
 
     // 메이슨
-    // TODO: status가 공개(public)인 프로젝트만 조회 가능하게 수정
-    @Query(value = "SELECT p FROM Project p WHERE (:artistackId IS NULL OR p.user.artistackId = :artistackId)")
-    Page<Project> getByConditionWithPaging(Pageable pageable, String artistackId);
+    @Query(value = "SELECT p FROM Project p WHERE (:artistackId IS NULL OR p.user.artistackId = :artistackId) AND p.scope = :scope")
+    Page<Project> getByConditionWithPaging(Pageable pageable, String artistackId, Scope scope);
 
     // 메이슨
-    @Query(value = "SELECT COUNT(p) FROM Project p WHERE p.user.artistackId = :artistackId")
-    Long countByArtistackId(String artistackId);
+    @Query(value = "SELECT COUNT(p) FROM Project p WHERE p.user.artistackId = :artistackId AND p.scope = 'PUBLIC'")
+    Long countPublicByArtistackId(String artistackId);
 }
