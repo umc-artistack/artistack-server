@@ -8,7 +8,9 @@ import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.InstrumentRepository;
 import com.artistack.instrument.repository.ProjectInstrumentRepository;
 import com.artistack.project.domain.Project;
+import com.artistack.project.domain.ProjectLike;
 import com.artistack.project.dto.ProjectDto;
+import com.artistack.project.repository.ProjectLikeRepository;
 import com.artistack.project.repository.ProjectRepository;
 import com.artistack.user.domain.User;
 
@@ -39,17 +41,18 @@ public class ProjectService {
     private final UserRepository userRepository;
     private final InstrumentRepository instrumentRepository;
     private final ProjectInstrumentRepository projectInstrumentRepository;
+    private final ProjectLikeRepository projectLikeRepository;
 
     // 프로젝트 전체 조회
     public List<ProjectDto> getAll() {
-        return projectRepository.findAll().stream().map(ProjectDto::response).collect(Collectors.toList());
+        return projectRepository.findAll().stream().map(ProjectDto::projectResponse).collect(Collectors.toList());
     }
 
     // 프로젝트 정보 조회
-    public List<ProjectDto> getById(Long projectId) {
-        return projectRepository.findById(projectId).stream()
-            .map(project -> ProjectDto.getProject(project, projectInstrumentRepository))
-            .collect(Collectors.toList());
+    public ProjectDto getById(Long projectId) {
+        return projectRepository.findById(projectId)
+            .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository))
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
     }
 
     /**
@@ -72,6 +75,50 @@ public class ProjectService {
         String artistackId = userRepository.findById(SecurityUtil.getUserId())
             .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND)).getArtistackId();
         return getByConditionWithPaging(pageable, Optional.of(artistackId));
+    }
+
+    // 프로젝트 좋아요 등록
+    @Transactional
+    public String likeProject(Long projectId) {
+        try {
+
+            User user = userRepository.findById(SecurityUtil.getUserId())
+                    .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+
+            Project project = projectRepository.findById(projectId)
+                    .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+
+            if (projectLikeRepository.findByUserAndProject(user,project).isPresent()) {
+                throw new GeneralException(Code.PROJECT_LIKE_EXIST, "프로젝트 좋아요가 이미 존재합니다.");
+            }
+
+            ProjectLike projectLike = projectLikeRepository.save(ProjectLike.of(user, project));
+
+            // projectLike.getId();
+
+            return "좋아요 등록이 완료되었습니다.";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    // 프로젝트 좋아요 취소
+    public String deleteLikeProject(Long projectId) {
+        User user = userRepository.findById(SecurityUtil.getUserId())
+                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+
+        if (projectLikeRepository.findByUserAndProject(user,project).isEmpty()) {
+            throw new GeneralException(Code.PROJECT_LIKE_NOT_EXIST, "취소할 프로젝트 좋아요가 존재하지 않습니다.");
+        }
+
+        projectLikeRepository.deleteByUserAndProject(user,project);
+
+        return "좋아요 취소가 완료되었습니다.";
     }
 
     // 프로젝트 게시
