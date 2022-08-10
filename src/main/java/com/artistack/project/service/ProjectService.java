@@ -49,10 +49,10 @@ public class ProjectService {
     }
 
     // 프로젝트 정보 조회
-    public List<ProjectDto> getById(Long projectId) {
-        return projectRepository.findById(projectId).stream()
+    public ProjectDto getById(Long projectId) {
+        return projectRepository.findById(projectId)
             .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository))
-            .collect(Collectors.toList());
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
     }
 
     /**
