@@ -21,13 +21,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -83,6 +77,41 @@ public class ProjectController {
         Pageable pageable
     ) {
         return DataResponseDto.of(projectService.getMyWithPaging(pageable));
+    }
+
+    /**
+     *  프로젝트 좋아요 등록 API - 셀리나
+     *  [Post] /projects/{projectId}/like
+     */
+    @ApiOperation(
+            value = "프로젝트 좋아요 등록"
+    )
+    @ApiImplicitParam(name = "projectId", value = "프로젝트 id", dataType = "integer")
+    @PostMapping(value = "/{projectId}/like")
+    public DataResponseDto<Object> likeProject(
+            @PathVariable Long projectId
+    ) {
+        try {
+            return DataResponseDto.of(projectService.likeProject(projectId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    /**
+     *  프로젝트 좋아요 취소 API - 셀리나
+     *  [DELETE] /projects/{projectId}/like
+     */
+    @ApiOperation(
+            value = "프로젝트 좋아요 취소"
+    )
+    @ApiImplicitParam(name = "projectId", value = "프로젝트 id", dataType = "integer")
+    @DeleteMapping(value = "/{projectId}/like")
+    public DataResponseDto<Object> deleteLikeProject(
+            @PathVariable Long projectId
+    ) {
+        return DataResponseDto.of(projectService.deleteLikeProject(projectId));
     }
 
     /**
