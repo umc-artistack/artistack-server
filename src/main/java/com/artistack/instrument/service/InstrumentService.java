@@ -43,7 +43,7 @@ public class InstrumentService {
             "https://artistack-bucket.s3.ap-northeast-2.amazonaws.com/instrument/drum300*300.png",
             "https://artistack-bucket.s3.ap-northeast-2.amazonaws.com/instrument/vocal300*300.png",
             "https://artistack-bucket.s3.ap-northeast-2.amazonaws.com/instrument/etc300*300.png");
-
+        
        for (int i = 1; i < names.size(); i++) {
            instrumentRepository.save(
                Instrument.builder().id((long) i).name(names.get(i)).imgUrl(imgUrls.get(i)).build());
