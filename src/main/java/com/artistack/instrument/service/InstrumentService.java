@@ -34,8 +34,9 @@ public class InstrumentService {
 
     @PostConstruct
     public void initialize() {
-        List<String> names = List.of("피아노", "기타", "베이스", "드럼", "보컬", "그외 악기");
+        List<String> names = List.of("", "피아노", "기타", "베이스", "드럼", "보컬", "그외 악기");
         List<String> imgUrls = List.of(
+            "",
             "https://artistack-bucket.s3.ap-northeast-2.amazonaws.com/instrument/piano300*300.png",
             "https://artistack-bucket.s3.ap-northeast-2.amazonaws.com/instrument/guitar300*300.png",
             "https://artistack-bucket.s3.ap-northeast-2.amazonaws.com/instrument/base300*300.png",
