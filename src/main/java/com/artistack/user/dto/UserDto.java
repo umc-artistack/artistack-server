@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
 
-    private String id;
+    private Long id;
     private String artistackId;
     private String nickname;
     private String description;
@@ -72,6 +72,14 @@ public class UserDto {
             .build();
     }
 
+    public static UserDto previewResponse(User user) {
+        return UserDto.builder()
+            .artistackId(user.getArtistackId())
+            .nickname(user.getNickname())
+            .profileImgUrl(user.getProfileImgUrl())
+            .build();
+    }
+
     public static UserDto stackResponse(User user, List<InstrumentDto> instruments) {
         return UserDto.builder()
             .nickname(user.getNickname())
@@ -83,13 +91,13 @@ public class UserDto {
     public User toEntity(UserRepository userRepository) {
         this.userRepository = userRepository;
 
-        return User.builder().
-            artistackId(validateArtistackId(artistackId)).
-            nickname(validateNickname(nickname)).
-            description(validateDescription(description)).
-            profileImgUrl(profileImgUrl)
-            .providerType(providerType).
-            build();
+        return User.builder()
+            .artistackId(validateArtistackId(artistackId))
+            .nickname(validateNickname(nickname))
+            .description(validateDescription(description))
+            .profileImgUrl(profileImgUrl)
+            .providerType(providerType)
+            .build();
     }
 
     public User updateEntity(User user, UserRepository userRepository) {
