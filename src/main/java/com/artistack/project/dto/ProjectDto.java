@@ -6,6 +6,7 @@ import com.artistack.instrument.repository.ProjectInstrumentRepository;
 import com.artistack.project.constant.Scope;
 import com.artistack.project.domain.Project;
 import com.artistack.user.domain.User;
+import com.artistack.user.dto.UserDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +42,7 @@ public class ProjectDto {
 
     private Long prevProjectId;
 
-    private User user;
+    private UserDto user;
 
     private List<InstrumentDto> instruments;
 
@@ -80,7 +81,7 @@ public class ProjectDto {
             .bpm(project.getBpm())
             .viewCount(project.getViewCount())
             .prevProjectId(project.getPrevProjectId())
-            .user(project.getUser())
+            .user(UserDto.previewResponse(project.getUser()))
             .instruments(Optional.ofNullable(projectInstrumentRepository).map(
                 e -> e.findByProjectId(project.getId()).stream().map(ProjectInstrument::getInstrument)
                     .map(InstrumentDto::response).collect(Collectors.toList())).orElse(null))
