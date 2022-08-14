@@ -35,15 +35,6 @@ public class ProjectController {
     private final ProjectService projectService;
 
     /**
-     *  프로젝트 전체 조회 API - 셀리나 (탐색)
-     *  [GET] /projects
-     *  후순위 개발
-     */
-    @ApiOperation(value = "프로젝트 전체 조회", notes = "DB에 저장된 모든 프로젝트들을 조회합니다.")
-    @GetMapping("")
-    public DataResponseDto<Object> getAllProjects() { return DataResponseDto.of(projectService.getAll()); }
-
-    /**
      *  프로젝트 정보 조회 API - 셀리나
      *  [Get] /projects/{projectId}
      */
@@ -64,9 +55,10 @@ public class ProjectController {
     @GetMapping("/search")
     public DataResponseDto<Object> getProjectsByConditionWithPaging(
         Pageable pageable,
-        @RequestParam Optional<String> artistackId
+        @RequestParam Optional<String> artistackId,
+        @RequestParam Optional<Long> lastId
     ) {
-        return DataResponseDto.of(projectService.getByConditionWithPaging(pageable, artistackId));
+        return DataResponseDto.of(projectService.getByConditionWithPaging(pageable, artistackId, lastId));
     }
     /**
      *  페이징과 함께 나의 프로젝트 정보 조회 API - 메이슨

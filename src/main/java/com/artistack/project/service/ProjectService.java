@@ -61,8 +61,8 @@ public class ProjectService {
      * @param artistackId 조회할 유저의 artistackId (optional)
      * @return 조건에 맞는 프로젝트들 (profileResponse)
      */
-    public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId) {
-        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null), Scope.PUBLIC)
+    public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId, Optional<Long> lastId) {
+        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null), lastId.orElse(null), Scope.PUBLIC)
             .map(ProjectDto::profileResponse);
     }
 
@@ -91,7 +91,7 @@ public class ProjectService {
     public Page<ProjectDto> getMyWithPaging(Pageable pageable) {
         String artistackId = userRepository.findById(SecurityUtil.getUserId())
             .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND)).getArtistackId();
-        return getByConditionWithPaging(pageable, Optional.of(artistackId));
+        return getByConditionWithPaging(pageable, Optional.of(artistackId), Optional.empty());
     }
 
     // 프로젝트 좋아요 등록

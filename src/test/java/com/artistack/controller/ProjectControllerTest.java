@@ -8,8 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.artistack.base.constant.Code;
 import com.artistack.instrument.dto.InstrumentDto;
-import com.artistack.project.constant.Scope;
 import com.artistack.jwt.dto.JwtDto;
+import com.artistack.project.constant.Scope;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.repository.ProjectRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +17,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,7 @@ class ProjectControllerTest extends BaseControllerTest {
     @Test
     @DisplayName("등록 - 최초")
     void uploadInitialTest() throws Exception {
-        uploadProject(accessToken, 0,Scope.PUBLIC, true, Code.OK.getCode());
+        uploadProject(accessToken, 0, Scope.PUBLIC, true, Code.OK.getCode());
     }
 
     @Test
@@ -86,7 +87,8 @@ class ProjectControllerTest extends BaseControllerTest {
         uploadProject(accessToken, projectCnt, Scope.PUBLIC, true, Code.OK.getCode());
     }
 
-    String uploadProject(String accessToken, Integer prev, Scope scope, Boolean isStackable, int code) throws Exception {
+    String uploadProject(String accessToken, Integer prev, Scope scope, Boolean isStackable, int code)
+        throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         MockMultipartFile video = new MockMultipartFile("video", "test.mp4", "video/mpeg",
             new FileInputStream(System.getProperty("user.dir") + "/src/main/resources/test.mp4"));
@@ -129,6 +131,72 @@ class ProjectControllerTest extends BaseControllerTest {
 
     // 메이슨
     @Test
+    @DisplayName("프로젝트들 조회")
+    void getProjectsTest() throws Exception {
+
+        int projectCnt = 5, pageSize = 20, otherUserProjectCnt = 2;
+        List<String> uploadUrls = new ArrayList<>();
+        for (int i = 0; i < projectCnt; i++) {
+            uploadUrls.add(uploadProject(accessToken, 0, Scope.PUBLIC, true, Code.OK.getCode()));
+        }
+
+        JwtDto jwt = oAuthControllerTest.signUp(oAuthControllerTest.testUserRegisterBody, Code.OK.getCode());
+        for (int i = 0; i < otherUserProjectCnt; i++) {
+            uploadUrls.add(uploadProject(jwt.getAccessToken(), 0, Scope.PUBLIC, true, Code.OK.getCode()));
+        }
+        List<ProjectDto> res = getProjects(accessToken, pageSize, Code.OK.getCode());
+        Collections.reverse(res);
+
+        for (int i = 0; i < res.size(); i++) {
+            then(res.get(i).getVideoUrl()).isEqualTo(uploadUrls.get(i));
+        }
+
+        then(res.size()).isEqualTo(Math.min(projectCnt + otherUserProjectCnt, pageSize));
+
+        Collections.reverse(res);
+        int lastIdx = 3;
+        List<ProjectDto> lastIdRes = getProjectsByLastId(accessToken, res.get(lastIdx).getId().intValue(), pageSize, Code.OK.getCode());
+        then(lastIdRes.get(0).getId()).isEqualTo(res.get(lastIdx + 1).getId());
+    }
+
+    // 메이슨
+    List<ProjectDto> getProjects(String ac, int pageSize, int code)
+        throws Exception {
+        MvcResult res = mockMvc.perform(
+                get(String.format("/projects/search?page=0&size=%d&sort=id,desc", pageSize))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + ac)
+            )
+            .andExpect(jsonPath("$.code").value(code))
+            .andDo(print())
+            .andReturn();
+
+        Map map = gson.fromJson(res.getResponse().getContentAsString(), Map.class);
+        map = gson.fromJson(gson.toJsonTree(map.get("data")), Map.class);
+        return gson.fromJson(gson.toJsonTree(map.get("content")), new TypeToken<ArrayList<ProjectDto>>() {
+        }.getType());
+    }
+
+    // 메이슨
+    List<ProjectDto> getProjectsByLastId(String ac, int lastId, int pageSize, int code)
+        throws Exception {
+        MvcResult res = mockMvc.perform(
+                get(String.format("/projects/search?page=0&size=%d&sort=id,desc&lastId=%d", pageSize, lastId))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + ac)
+            )
+            .andExpect(jsonPath("$.code").value(code))
+            .andDo(print())
+            .andReturn();
+
+        Map map = gson.fromJson(res.getResponse().getContentAsString(), Map.class);
+        map = gson.fromJson(gson.toJsonTree(map.get("data")), Map.class);
+        return gson.fromJson(gson.toJsonTree(map.get("content")), new TypeToken<ArrayList<ProjectDto>>() {
+        }.getType());
+    }
+
+    // 메이슨
+    @Test
     @DisplayName("artistack id로 프로젝트들 조회")
     void getProjectsByArtistackIdTest() throws Exception {
 
@@ -151,7 +219,8 @@ class ProjectControllerTest extends BaseControllerTest {
         }
 
         then(res.size()).isEqualTo(Math.min(projectCnt, pageSize));
-        then(projectRepository.countPublicByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(projectCnt);
+        then(projectRepository.countPublicByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(
+            projectCnt);
         then(projectRepository.countPublicByArtistackId(
             oAuthControllerTest.testUserRegisterBody.get("artistackId").toString())).isEqualTo(otherUserProjectCnt);
     }
@@ -193,7 +262,8 @@ class ProjectControllerTest extends BaseControllerTest {
         }
 
         then(res.size()).isEqualTo(Math.min(projectCnt, pageSize));
-        then(projectRepository.countPublicByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(projectCnt);
+        then(projectRepository.countPublicByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(
+            projectCnt);
     }
 
     // 메이슨
@@ -224,7 +294,8 @@ class ProjectControllerTest extends BaseControllerTest {
             uploadUrls.add(uploadProject(accessToken, 0, Scope.PUBLIC, true, Code.OK.getCode()));
         }
 
-        then(projectRepository.countPublicByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(projectCnt);
+        then(projectRepository.countPublicByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(
+            projectCnt);
 
         List<ProjectDto> res = getMyProjects(accessToken, pageSize, Code.OK.getCode());
 
@@ -232,7 +303,8 @@ class ProjectControllerTest extends BaseControllerTest {
 
         deleteMyProject(accessToken, targetId.intValue(), Code.OK.getCode());
 
-        then(projectRepository.countPublicByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(projectCnt - 1);
+        then(projectRepository.countPublicByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(
+            projectCnt - 1);
     }
 
     // 메이슨
