@@ -22,4 +22,13 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Project> findAllByPrevProjectId(Long id);
 
     Optional<Project> findProjectByPrevProjectId(Long id);
+
+    // 메이슨
+    // TODO: status가 공개(public)인 프로젝트만 조회 가능하게 수정
+    @Query(value = "SELECT p FROM Project p WHERE (:artistackId IS NULL OR p.user.artistackId = :artistackId)")
+    Page<Project> getByConditionWithPaging(Pageable pageable, String artistackId);
+
+    // 메이슨
+    @Query(value = "SELECT COUNT(p) FROM Project p WHERE p.user.artistackId = :artistackId")
+    Long countByArtistackId(String artistackId);
 }

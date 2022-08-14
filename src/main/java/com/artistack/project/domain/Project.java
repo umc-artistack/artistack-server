@@ -1,8 +1,8 @@
 package com.artistack.project.domain;
 
 import com.artistack.config.BaseTimeEntity;
-import com.artistack.instrument.domain.Instrument;
 import com.artistack.instrument.domain.ProjectInstrument;
+import com.artistack.project.constant.Scope;
 import com.artistack.user.domain.User;
 import com.sun.istack.NotNull;
 import java.util.List;
@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import org.hibernate.annotations.Formula;
 
 @Entity
 @Getter
@@ -39,7 +40,8 @@ public class Project extends BaseTimeEntity {
     List<ProjectInstrument> instruments;
 
     @NotNull
-    private Integer scope;
+    @Enumerated
+    private Scope scope;
 
     @NotNull
     private Boolean isStackable;
@@ -53,9 +55,17 @@ public class Project extends BaseTimeEntity {
 
     private Integer viewCount;
 
+    // 메이슨) 현재 프로젝트를 스택한 프로젝트 개수
+    @Formula("(SELECT count(*) FROM project p where p.prev_project_id = id)")
+    private Integer stackCount;
+
+    @Formula("(SELECT count(*) FROM project_like pl where pl.project_id = id)")
+    private Integer likeCount;
+
     @Builder
     public Project(Long id, String videoUrl, String title, String description, String bpm, String codeFlow,
-        List<ProjectInstrument> instruments, Integer scope, Boolean isStackable, Long prevProjectId, User user, Integer viewCount) {
+        List<ProjectInstrument> instruments, Scope scope, Boolean isStackable, Long prevProjectId, User user, Integer viewCount,
+                   Integer stackCount, Integer likeCount) {
         this.id = id;
         this.videoUrl = videoUrl;
         this.title = title;
@@ -68,5 +78,7 @@ public class Project extends BaseTimeEntity {
         this.viewCount = viewCount;
         this.prevProjectId = prevProjectId;
         this.user = user;
+        this.stackCount = stackCount;
+        this.likeCount = likeCount;
     }
 }

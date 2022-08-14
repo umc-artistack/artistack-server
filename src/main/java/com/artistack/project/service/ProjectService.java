@@ -8,19 +8,33 @@ import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.InstrumentRepository;
 import com.artistack.instrument.repository.ProjectInstrumentRepository;
 import com.artistack.project.domain.Project;
+import com.artistack.project.domain.ProjectLike;
 import com.artistack.project.dto.ProjectDto;
+import com.artistack.project.repository.ProjectLikeRepository;
 import com.artistack.project.repository.ProjectRepository;
 import com.artistack.user.domain.User;
+<<<<<<< HEAD
 import com.artistack.user.dto.UserDto;
 import com.artistack.user.repository.UserRepository;
 import com.artistack.util.SecurityUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+=======
+
+import com.artistack.user.repository.UserRepository;
+import com.artistack.util.SecurityUtil;
+import java.io.IOException;
+import com.artistack.user.dto.UserDto;
+import java.util.ArrayList;
+>>>>>>> 89b9c97b15714affababe42e54e720b7f146e722
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,21 +44,90 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @Transactional
 public class ProjectService {
+
     private final S3UploaderService s3UploaderService;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final InstrumentRepository instrumentRepository;
     private final ProjectInstrumentRepository projectInstrumentRepository;
+    private final ProjectLikeRepository projectLikeRepository;
 
     // 프로젝트 전체 조회
     public List<ProjectDto> getAll() {
-        return projectRepository.findAll().stream().map(ProjectDto::response).collect(Collectors.toList());
+        return projectRepository.findAll().stream().map(ProjectDto::projectResponse).collect(Collectors.toList());
     }
 
     // 프로젝트 정보 조회
-    public List<ProjectDto> getById(Long projectId) {
-        return projectRepository.findById(projectId).stream().map(project -> ProjectDto.getProject(project, projectInstrumentRepository))
-            .collect(Collectors.toList());
+    public ProjectDto getById(Long projectId) {
+        return projectRepository.findById(projectId)
+            .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository))
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+    }
+
+    /**
+     * 메이슨) 조건에 맞는 프로젝트들을 페이징 기능과 함께 반환합니다
+     *
+     * @param artistackId 조회할 유저의 artistackId (optional)
+     * @return 조건에 맞는 프로젝트들 (profileResponse)
+     */
+    public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId) {
+        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null))
+            .map(ProjectDto::profileResponse);
+    }
+
+    /**
+     * 메이슨) 내 프로젝트들을 페이징 기능과 함께 반환합니다
+     *
+     * @return 내 프로젝트들 (profileResponse)
+     */
+    public Page<ProjectDto> getMyWithPaging(Pageable pageable) {
+        String artistackId = userRepository.findById(SecurityUtil.getUserId())
+            .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND)).getArtistackId();
+        return getByConditionWithPaging(pageable, Optional.of(artistackId));
+    }
+
+    // 프로젝트 좋아요 등록
+    @Transactional
+    public String likeProject(Long projectId) {
+        try {
+
+            User user = userRepository.findById(SecurityUtil.getUserId())
+                    .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+
+            Project project = projectRepository.findById(projectId)
+                    .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+
+            if (projectLikeRepository.findByUserAndProject(user,project).isPresent()) {
+                throw new GeneralException(Code.PROJECT_LIKE_EXIST, "프로젝트 좋아요가 이미 존재합니다.");
+            }
+
+            ProjectLike projectLike = projectLikeRepository.save(ProjectLike.of(user, project));
+
+            // projectLike.getId();
+
+            return "좋아요 등록이 완료되었습니다.";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    // 프로젝트 좋아요 취소
+    public String deleteLikeProject(Long projectId) {
+        User user = userRepository.findById(SecurityUtil.getUserId())
+                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+
+        if (projectLikeRepository.findByUserAndProject(user,project).isEmpty()) {
+            throw new GeneralException(Code.PROJECT_LIKE_NOT_EXIST, "취소할 프로젝트 좋아요가 존재하지 않습니다.");
+        }
+
+        projectLikeRepository.deleteByUserAndProject(user,project);
+
+        return "좋아요 취소가 완료되었습니다.";
     }
 
     // 프로젝트 게시
@@ -53,7 +136,7 @@ public class ProjectService {
 
         boolean isInitial = prevProjectId.equals(0L);
 
-        // validaiton: 최초 프로젝트가 아닐 경우
+        // validation: 최초 프로젝트가 아닐 경우
         if (!isInitial) {
             // 1. 이전 프로젝트가 존재하는가?
             if (projectRepository.findById(prevProjectId).isEmpty()) {
@@ -80,7 +163,7 @@ public class ProjectService {
 
             for (InstrumentDto instrumentDto : instruments) {
                 Instrument instrument = instrumentRepository.findById(instrumentDto.getId())
-                        .orElseThrow(() -> new GeneralException(Code.INVALID_INSTRUMENT, "올바른 악기를 선택해주세요."));
+                    .orElseThrow(() -> new GeneralException(Code.INVALID_INSTRUMENT, "올바른 악기를 선택해주세요."));
                 projectInstrumentRepository.save(instrumentDto.toEntity(project, instrument));
             }
 
@@ -101,9 +184,13 @@ public class ProjectService {
     public List<UserDto> getStackers(Long projectId, String sequence) {
         if (sequence.equals("prev")) {
             return getPrevStackers(projectId);
+<<<<<<< HEAD
         }
 
         else {
+=======
+        } else {
+>>>>>>> 89b9c97b15714affababe42e54e720b7f146e722
             return getNextStackers(projectId);
         }
     }
@@ -115,7 +202,11 @@ public class ProjectService {
 
         Long prevProjectId = projectRepository.findById(projectId)
             .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."))
+<<<<<<< HEAD
                 .getPrevProjectId();
+=======
+            .getPrevProjectId();
+>>>>>>> 89b9c97b15714affababe42e54e720b7f146e722
 
         while (prevProjectId != 0) {
             Project project = projectRepository.findById(prevProjectId)
@@ -148,7 +239,13 @@ public class ProjectService {
             List<InstrumentDto> instruments = getInstrumentDtoFromProject(project);
 
             // userDto는 ListInstrumentDto(id, name, imgUrl인데 id만 반환할거임)를 사용
+<<<<<<< HEAD
             User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+=======
+            User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+
+>>>>>>> 89b9c97b15714affababe42e54e720b7f146e722
             UserDto userDto = UserDto.stackResponse(user, instruments);
             stackers.add(userDto);
         }

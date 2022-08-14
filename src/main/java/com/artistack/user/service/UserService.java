@@ -1,13 +1,11 @@
 package com.artistack.user.service;
 
 
-import static com.artistack.user.constant.UserConstraint.ARTISTACK_ID_MAX_LENGTH;
-import static com.artistack.user.constant.UserConstraint.DESCRIPTION_MAX_LENGTH;
-import static com.artistack.user.constant.UserConstraint.NICKNAME_MAX_LENGTH;
-import static org.apache.logging.log4j.util.Strings.isBlank;
-
 import com.artistack.base.GeneralException;
 import com.artistack.base.constant.Code;
+import com.artistack.instrument.repository.UserInstrumentRepository;
+import com.artistack.jwt.repository.JwtRepository;
+import com.artistack.oauth.service.OAuthService;
 import com.artistack.user.domain.User;
 import com.artistack.user.dto.UserDto;
 import com.artistack.user.repository.UserRepository;
@@ -23,33 +21,80 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
 
+    private final OAuthService oAuthService;
     private final UserRepository userRepository;
+    private final JwtRepository jwtRepository;
+    private final UserInstrumentRepository userInstrumentRepository;
+
+    private User getUser(Long id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new GeneralException(Code.UNAUTHORIZED));
+    }
+
 
     /**
-     * 메이슨) 회원가입, 회원정보수정 시 dto 유효성 검사를 수행합니다.
+     * 메이슨) 회원 정보를 조회합니다
      *
-     * @param userDto request body
+     * @param userId 조회할 유저 id
+     * @return 유저 dto
      */
-    public void validateRequest(UserDto userDto) {
-        // artistack id nullable, 길이 검사
-        if (isBlank(userDto.getArtistackId()) || userDto.getArtistackId().contains(" ")
-            || userDto.getArtistackId().length() > ARTISTACK_ID_MAX_LENGTH.getKey()) {
-            throw new GeneralException(Code.ARTISTACK_ID_FORMAT_ERROR);
-        }
-        // artistack id 중복 검사
-        if (userRepository.findByArtistackId(userDto.getArtistackId()).isPresent()) {
-            throw new GeneralException(Code.ARTISTACK_ID_DUPLICATED);
+    public UserDto get(Long userId) {
+        return UserDto.baseResponse(getUser(userId), userInstrumentRepository);
+    }
+
+    public UserDto getMe() {
+        return get(SecurityUtil.getUserId());
+    }
+
+    public UserDto getByArtistackId(String artistackId) {
+        Long id = userRepository.findByArtistackId(artistackId)
+            .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, artistackId)).getId();
+        return get(id);
+    }
+
+
+    /**
+     * 메이슨) 내 정보를 업데이트합니다
+     *
+     * @param userDto 업데이트 할 body
+     * @return 업데이트된 유저 정보
+     */
+    public UserDto updateMe(UserDto userDto) {
+        User me = getUser(SecurityUtil.getUserId());
+        me = userRepository.save(userDto.updateEntity(me, userRepository));
+        return UserDto.baseResponse(me);
+    }
+
+
+    /**
+     * 메이슨) 회원탈퇴를 진행합니다
+     *
+     * @param userId 탈퇴할 유저 id
+     * @return 탈퇴 성공 시 true
+     */
+    public Boolean delete(Long userId) {
+        User user = getUser(userId);
+
+        switch (user.getProviderType()) {
+            case KAKAO:
+                oAuthService.unlinkKakaoAccount(userId);
+                break;
+            case APPLE:
+                break;
         }
 
-        // nickname nullable, 길이 검사
-        if (isBlank(userDto.getNickname()) || userDto.getArtistackId().contains(" ")
-            || userDto.getNickname().length() > NICKNAME_MAX_LENGTH.getKey()) {
-            throw new GeneralException(Code.NICKNAME_FORMAT_ERROR);
-        }
+        jwtRepository.deleteByUserId(user.getId());
+        user.withdraw();
 
-        // description 길이 검사
-        if (!isBlank(userDto.getDescription()) && userDto.getDescription().length() > DESCRIPTION_MAX_LENGTH.getKey()) {
-            throw new GeneralException(Code.USER_DESCRIPTION_FORMAT_ERROR);
-        }
+        return true;
+    }
+
+    public Boolean deleteMe() {
+        return delete(SecurityUtil.getUserId());
+    }
+
+
+    public boolean isArtistackIdDuplicated(String artistackId) {
+        return userRepository.findByArtistackId(artistackId).isPresent();
     }
 }
