@@ -45,15 +45,15 @@ public class ProjectController {
 
     /**
      *  프로젝트 정보 조회 API - 셀리나
-     *  [Get] /projects/{projectId}/info
+     *  [Get] /projects/{projectId}
      */
-    @ApiOperation(value = "프로젝트 정보 조회", notes = "단일 프로젝트를 조회합니다. id에 프로젝트 아이디를 입력해주세요.")
-    @ApiImplicitParam(name = "id", value = "정보를 조회할 프로젝트 id", required = true, dataType = "long", paramType = "path")
-    @GetMapping("/{id}/info")
+    @ApiOperation(value = "프로젝트 정보 조회", notes = "단일 프로젝트를 조회합니다. projectId를 입력해주세요.")
+    @ApiImplicitParam(name = "projectId", value = "정보를 조회할 프로젝트 id", required = true, dataType = "long", paramType = "path")
+    @GetMapping("/{projectId}")
     public DataResponseDto<Object> getProject(
-            @PathVariable Long id
+            @PathVariable Long projectId
     )  {
-        return DataResponseDto.of(projectService.getById(id));
+        return DataResponseDto.of(projectService.getById(projectId));
     }
 
     /**
