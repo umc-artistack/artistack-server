@@ -140,41 +140,33 @@ public class ProjectService {
             }
         }
 
+        List<Long> instrumentIds = projectDto.getInstrumentIds();
+
+        User user = userRepository.findById(SecurityUtil.getUserId())
+            .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+
+        // 동영상을 S3에 저장한 후 URL을 가져옴
+        String videoUrl = null;
         try {
-
-            List<Long> instrumentIds = projectDto.getInstrumentIds();
-            System.out.println("여기봐");
-
-            User user = userRepository.findById(SecurityUtil.getUserId())
-                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
-
-            // 동영상을 S3에 저장한 후 URL을 가져옴
-            String videoUrl = s3UploaderService.uploadFile(video);
+            videoUrl = s3UploaderService.uploadFile(video);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 //            String videoUrl = "테스트";
 
-            Project project = projectRepository.save(projectDto.toEntity(videoUrl, prevProjectId, user));
+        Project project = projectRepository.save(projectDto.toEntity(videoUrl, prevProjectId, user));
 
-            for (Long instrumentId : instrumentIds) {
-                Instrument instrument = instrumentRepository.findById(instrumentId)
-                    .orElseThrow(() -> new GeneralException(Code.INVALID_INSTRUMENT,
-                        "Controller validation failed - API 담당자에게 말해주세요!"));
-                projectInstrumentRepository.save(
-                    new InstrumentDto(instrument.getId(), instrument.getName(), instrument.getImgUrl())
-                        .toEntity(project, instrument)
-                );
-            }
-
-            return project.getVideoUrl();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                throw e;
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-//            throw e;
+        for (Long instrumentId : instrumentIds) {
+            Instrument instrument = instrumentRepository.findById(instrumentId)
+                .orElseThrow(() -> new GeneralException(Code.INVALID_INSTRUMENT,
+                    "Controller validation failed - API 담당자에게 말해주세요!"));
+            projectInstrumentRepository.save(
+                new InstrumentDto(instrument.getId(), instrument.getName(), instrument.getImgUrl())
+                    .toEntity(project, instrument)
+            );
         }
+
+        return project.getVideoUrl();
     }
 
     // 스택 조회 - 다음 스택인지, 이전 스택인지 선택
