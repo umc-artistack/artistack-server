@@ -81,6 +81,22 @@ public class ProjectController {
     }
 
     /**
+     *  나의 프로젝트 삭제 API - 메이슨
+     *  [Delete] /projects/{projectId}
+     */
+    @ApiOperation(
+        value = "프로젝트 삭제"
+    )
+    @ApiImplicitParam(name = "projectId", value = "프로젝트 id", dataType = "integer")
+    @DeleteMapping(value = "/{projectId}")
+    public DataResponseDto<Object> deleteMyProject(
+        @PathVariable Long projectId
+    ) {
+        return DataResponseDto.of(projectService.deleteMyProject(projectId));
+    }
+
+
+    /**
      *  프로젝트 좋아요 등록 API - 셀리나
      *  [Post] /projects/{projectId}/like
      */

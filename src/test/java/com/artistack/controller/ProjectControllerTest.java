@@ -1,6 +1,7 @@
 package com.artistack.controller;
 
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -212,4 +213,40 @@ class ProjectControllerTest extends BaseControllerTest {
         return gson.fromJson(gson.toJsonTree(map.get("content")), new TypeToken<ArrayList<ProjectDto>>() {
         }.getType());
     }
+
+    // 메이슨
+    @Test
+    @DisplayName("내 프로젝트 삭제")
+    void deleteMyProjectTest() throws Exception {
+        int projectCnt = 5, pageSize = 3;
+        List<String> uploadUrls = new ArrayList<>();
+        for (int i = 0; i < projectCnt; i++) {
+            uploadUrls.add(uploadProject(accessToken, 0, Scope.PUBLIC, true, Code.OK.getCode()));
+        }
+
+        then(projectRepository.countPublicByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(projectCnt);
+
+        List<ProjectDto> res = getMyProjects(accessToken, pageSize, Code.OK.getCode());
+
+        Long targetId = res.get(0).getId();
+
+        deleteMyProject(accessToken, targetId.intValue(), Code.OK.getCode());
+
+        then(projectRepository.countPublicByArtistackId(registerBody.get("artistackId").toString())).isEqualTo(projectCnt - 1);
+    }
+
+    // 메이슨
+    void deleteMyProject(String ac, int projectId, int code)
+        throws Exception {
+        MvcResult res = mockMvc.perform(
+                delete("/projects/" + projectId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + ac)
+            )
+            .andExpect(jsonPath("$.code").value(code))
+            .andDo(print())
+            .andReturn();
+    }
+
+
 }

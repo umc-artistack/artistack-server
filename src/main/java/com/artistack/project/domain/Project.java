@@ -3,6 +3,7 @@ package com.artistack.project.domain;
 import com.artistack.config.BaseTimeEntity;
 import com.artistack.instrument.domain.ProjectInstrument;
 import com.artistack.project.constant.Scope;
+import com.artistack.user.constant.Role;
 import com.artistack.user.domain.User;
 import com.sun.istack.NotNull;
 import java.util.List;
@@ -80,5 +81,15 @@ public class Project extends BaseTimeEntity {
         this.user = user;
         this.stackCount = stackCount;
         this.likeCount = likeCount;
+    }
+
+    // 메이슨) 프로젝트를 삭제 처리합니다
+    public void delete() {
+        videoUrl = null;
+        description = null;
+        bpm = null;
+        codeFlow = null;
+        user = null;
+        scope = Scope.DELETED;
     }
 }
