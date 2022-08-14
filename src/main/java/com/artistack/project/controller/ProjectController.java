@@ -180,6 +180,11 @@ public class ProjectController {
             }
         }
 
+        // validation: 2개 이상의 악기 id를 사용했을 경우
+        if (projectDto.getInstrumentIds().size() > 1) {
+            throw new GeneralException(Code.MULTI_INSTRUMENT_ERROR, "하나의 악기만 선택할 수 있습니다.");
+        }
+
         try {
 
             String videoUrl = projectService.insertProject(prevProjectId, video, projectDto);
