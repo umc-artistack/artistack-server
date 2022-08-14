@@ -124,34 +124,6 @@ public class ProjectController {
     @ApiOperation(value = "스택 조회")
     @ApiImplicitParams( value = {
         @ApiImplicitParam(name = "projectId", value = "현재 프로젝트 id", required = true, dataType = "long", paramType = "path"),
-        @ApiImplicitParam(name = "sequence", value = "순서 (prev와 next만 가능)", required = true, dataType = "string", paramType = "path")})
-    @GetMapping("/{projectId}/{sequence}")
-    public DataResponseDto<Object> getStack(@PathVariable Long projectId, @PathVariable String sequence) {
-        // validation
-        // 1. query parameter가 next, prev를 제외한 다른 값이 들어올 경우
-        if (!(sequence.equals("next") || sequence.equals("prev"))) {
-            throw new GeneralException(Code.INVALID_SEQUENCE, "sequence는 prev나 next만 사용할 수 있습니다.");
-        }
-
-        try {
-            List<UserDto> stackers = projectService.getStackers(projectId, sequence);
-
-            return DataResponseDto.of(stackers);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
-    /**
-     *  스택 조회 API - 제이
-     *  [Get] /projects/{projectId}/prev
-     *  [Get] /projects/{projectId}/next
-     */
-    @ApiOperation(value = "스택 조회")
-    @ApiImplicitParams( value = {
-        @ApiImplicitParam(name = "projectId", value = "현재 프로젝트 id", required = true, dataType = "long", paramType = "path"),
         @ApiImplicitParam(name = "sequence", value = "순서(prev or next)", required = true, dataType = "string", paramType = "path")})
     @GetMapping("/{projectId}/{sequence}")
     public DataResponseDto<Object> getStack(@PathVariable Long projectId, @PathVariable String sequence) {
