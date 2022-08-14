@@ -112,6 +112,7 @@ class ProjectControllerTest extends BaseControllerTest {
             getInstrumentsFromEntity.add(projectInstrumentEntity.getInstrument());
 
         }
+        then(getInstrumentsFromEntity.size()).isEqualTo(1);
 
         // Repository에 저장된 악기 리스트
         List<Instrument> getInstrumentsFromRepository = new ArrayList<>();
