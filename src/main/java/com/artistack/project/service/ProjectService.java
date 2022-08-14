@@ -141,21 +141,27 @@ public class ProjectService {
         }
 
         try {
-            // 동영상을 S3에 저장한 후 URL을 가져옴
-            String videoUrl = s3UploaderService.uploadFile(video);
-//            String videoUrl = "테스트";
 
-            List<InstrumentDto> instruments = projectDto.getInstruments();
+            List<Long> instrumentIds = projectDto.getInstrumentIds();
+            System.out.println("여기봐");
 
             User user = userRepository.findById(SecurityUtil.getUserId())
                 .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
 
+            // 동영상을 S3에 저장한 후 URL을 가져옴
+            String videoUrl = s3UploaderService.uploadFile(video);
+//            String videoUrl = "테스트";
+
             Project project = projectRepository.save(projectDto.toEntity(videoUrl, prevProjectId, user));
 
-            for (InstrumentDto instrumentDto : instruments) {
-                Instrument instrument = instrumentRepository.findById(instrumentDto.getId())
-                    .orElseThrow(() -> new GeneralException(Code.INVALID_INSTRUMENT, "올바른 악기를 선택해주세요."));
-                projectInstrumentRepository.save(instrumentDto.toEntity(project, instrument));
+            for (Long instrumentId : instrumentIds) {
+                Instrument instrument = instrumentRepository.findById(instrumentId)
+                    .orElseThrow(() -> new GeneralException(Code.INVALID_INSTRUMENT,
+                        "Controller validation failed - API 담당자에게 말해주세요!"));
+                projectInstrumentRepository.save(
+                    new InstrumentDto(instrument.getId(), instrument.getName(), instrument.getImgUrl())
+                        .toEntity(project, instrument)
+                );
             }
 
             return project.getVideoUrl();
