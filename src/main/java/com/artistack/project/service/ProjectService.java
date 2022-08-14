@@ -13,21 +13,12 @@ import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.repository.ProjectLikeRepository;
 import com.artistack.project.repository.ProjectRepository;
 import com.artistack.user.domain.User;
-<<<<<<< HEAD
 import com.artistack.user.dto.UserDto;
 import com.artistack.user.repository.UserRepository;
 import com.artistack.util.SecurityUtil;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-=======
 
-import com.artistack.user.repository.UserRepository;
-import com.artistack.util.SecurityUtil;
-import java.io.IOException;
-import com.artistack.user.dto.UserDto;
-import java.util.ArrayList;
->>>>>>> 89b9c97b15714affababe42e54e720b7f146e722
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -184,13 +175,7 @@ public class ProjectService {
     public List<UserDto> getStackers(Long projectId, String sequence) {
         if (sequence.equals("prev")) {
             return getPrevStackers(projectId);
-<<<<<<< HEAD
-        }
-
-        else {
-=======
         } else {
->>>>>>> 89b9c97b15714affababe42e54e720b7f146e722
             return getNextStackers(projectId);
         }
     }
@@ -202,11 +187,8 @@ public class ProjectService {
 
         Long prevProjectId = projectRepository.findById(projectId)
             .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."))
-<<<<<<< HEAD
                 .getPrevProjectId();
-=======
-            .getPrevProjectId();
->>>>>>> 89b9c97b15714affababe42e54e720b7f146e722
+
 
         while (prevProjectId != 0) {
             Project project = projectRepository.findById(prevProjectId)
@@ -239,13 +221,9 @@ public class ProjectService {
             List<InstrumentDto> instruments = getInstrumentDtoFromProject(project);
 
             // userDto는 ListInstrumentDto(id, name, imgUrl인데 id만 반환할거임)를 사용
-<<<<<<< HEAD
-            User user = userRepository.findById(userId).orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
-=======
             User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
 
->>>>>>> 89b9c97b15714affababe42e54e720b7f146e722
             UserDto userDto = UserDto.stackResponse(user, instruments);
             stackers.add(userDto);
         }

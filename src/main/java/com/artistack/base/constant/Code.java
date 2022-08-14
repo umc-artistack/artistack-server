@@ -38,11 +38,9 @@ public enum Code {
     PREV_PROJECT_NOT_STACKABLE(2205, HttpStatus.BAD_REQUEST, "Previous project isn't stackable"),
     INVALID_SEQUENCE(2206, HttpStatus.BAD_REQUEST, "Invalid sequence"),
 
-    PROJECT_NOT_FOUND(2207, HttpStatus.BAD_REQUEST, "Cannot find project from DB"),
     PROJECT_LIKE_EXIST(2207, HttpStatus.BAD_REQUEST, "Project Like already exist"),
     PROJECT_LIKE_NOT_EXIST(2208, HttpStatus.BAD_REQUEST, "Project Like doesn't exist"),
     INVALID_INSTRUMENT(2301, HttpStatus.BAD_REQUEST, "Invalid instrument"),
-
     INTERNAL_ERROR(4000, HttpStatus.INTERNAL_SERVER_ERROR, "Internal error"),
     DATA_ACCESS_ERROR(4001, HttpStatus.INTERNAL_SERVER_ERROR, "Data access error"),
     KAKAO_SERVER_ERROR(4002, HttpStatus.INTERNAL_SERVER_ERROR , "Kakao server error"),

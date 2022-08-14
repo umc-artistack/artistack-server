@@ -1,9 +1,6 @@
 package com.artistack.user.dto;
 
-<<<<<<< HEAD
-import com.artistack.instrument.domain.Instrument;
-import com.artistack.instrument.domain.ProjectInstrument;
-=======
+
 import static com.artistack.user.constant.UserConstraint.ARTISTACK_ID_MAX_LENGTH;
 import static com.artistack.user.constant.UserConstraint.ARTISTACK_ID_MIN_LENGTH;
 import static com.artistack.user.constant.UserConstraint.DESCRIPTION_MAX_LENGTH;
@@ -13,7 +10,6 @@ import static org.apache.logging.log4j.util.Strings.isBlank;
 
 import com.artistack.base.GeneralException;
 import com.artistack.base.constant.Code;
->>>>>>> 89b9c97b15714affababe42e54e720b7f146e722
 import com.artistack.instrument.domain.UserInstrument;
 import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.UserInstrumentRepository;
@@ -77,19 +73,13 @@ public class UserDto {
             .build();
     }
 
-<<<<<<< HEAD
-    public static UserDto stackResponse(User user, List<InstrumentDto> instruments) {
-=======
+
     public static UserDto previewResponse(User user) {
->>>>>>> 89b9c97b15714affababe42e54e720b7f146e722
+
         return UserDto.builder()
             .artistackId(user.getArtistackId())
             .nickname(user.getNickname())
             .profileImgUrl(user.getProfileImgUrl())
-<<<<<<< HEAD
-            .instruments(instruments)
-=======
->>>>>>> 89b9c97b15714affababe42e54e720b7f146e722
             .build();
     }
 
