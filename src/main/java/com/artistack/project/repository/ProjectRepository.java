@@ -5,6 +5,7 @@ import com.artistack.user.domain.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +22,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     List<Project> findAllByPrevProjectId(Long id);
 
-    Optional<Project> findProjectByPrevProjectId(Long id);
+    Project findTopByOrderByIdDesc();
 
     // 메이슨
     // TODO: status가 공개(public)인 프로젝트만 조회 가능하게 수정
