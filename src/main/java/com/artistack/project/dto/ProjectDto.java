@@ -46,6 +46,8 @@ public class ProjectDto {
 
     private List<InstrumentDto> instruments;
 
+    private List<Long> instrumentIds;
+
     private Integer likeCount;
 
     private Integer stackCount;
@@ -92,13 +94,13 @@ public class ProjectDto {
     }
 
     public static ProjectDto insertProject(String title, String description, String bpm, String codeFlow,
-        List<InstrumentDto> instruments, Scope scope, Boolean isStackable) {
+        List<Long> instrumentIds, Scope scope, Boolean isStackable) {
         return ProjectDto.builder()
             .title(title)
             .description(description)
             .bpm(bpm)
             .codeFlow(codeFlow)
-            .instruments(instruments)
+            .instrumentIds(instrumentIds)
             .scope(scope)
             .isStackable(isStackable)
             .build();
