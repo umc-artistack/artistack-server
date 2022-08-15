@@ -61,6 +61,7 @@ public enum Code {
     EXPIRED_JWT(5006, HttpStatus.UNAUTHORIZED, "Jwt expired. Reissue it"),
     UNSUPPORTED_JWT(5007, HttpStatus.UNAUTHORIZED, "Unsupported jwt format"),
     ILLEGAL_JWT(5008, HttpStatus.UNAUTHORIZED, "Illegal jwt format"),
+    FORBIDDEN(5009, HttpStatus.FORBIDDEN, "Forbidden"),
     ;
 
 
