@@ -6,6 +6,7 @@ import com.artistack.base.dto.DataResponseDto;
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.project.service.ProjectService;
 import com.artistack.user.dto.UserDto;
+import com.artistack.util.SecurityUtil;
 import io.swagger.annotations.ApiImplicitParams;
 import java.util.List;
 
@@ -36,15 +37,6 @@ public class ProjectController {
     private final ProjectService projectService;
 
     /**
-     *  프로젝트 전체 조회 API - 셀리나 (탐색)
-     *  [GET] /projects
-     *  후순위 개발
-     */
-    @ApiOperation(value = "프로젝트 전체 조회", notes = "DB에 저장된 모든 프로젝트들을 조회합니다.")
-    @GetMapping("")
-    public DataResponseDto<Object> getAllProjects() { return DataResponseDto.of(projectService.getAll()); }
-
-    /**
      *  프로젝트 정보 조회 API - 셀리나
      *  [Get] /projects/{projectId}
      */
@@ -65,9 +57,10 @@ public class ProjectController {
     @GetMapping("/search")
     public DataResponseDto<Object> getProjectsByConditionWithPaging(
         Pageable pageable,
-        @RequestParam Optional<String> artistackId
+        @RequestParam Optional<String> artistackId,
+        @RequestParam Optional<Long> lastId
     ) {
-        return DataResponseDto.of(projectService.getByConditionWithPaging(pageable, artistackId));
+        return DataResponseDto.of(projectService.getByConditionWithPaging(pageable, artistackId, lastId));
     }
     /**
      *  페이징과 함께 나의 프로젝트 정보 조회 API - 메이슨
@@ -80,6 +73,22 @@ public class ProjectController {
     ) {
         return DataResponseDto.of(projectService.getMyWithPaging(pageable));
     }
+
+    /**
+     *  나의 프로젝트 삭제 API - 메이슨
+     *  [Delete] /projects/{projectId}
+     */
+    @ApiOperation(
+        value = "프로젝트 삭제"
+    )
+    @ApiImplicitParam(name = "projectId", value = "프로젝트 id", dataType = "integer")
+    @DeleteMapping(value = "/{projectId}")
+    public DataResponseDto<Object> deleteMyProject(
+        @PathVariable Long projectId
+    ) {
+        return DataResponseDto.of(projectService.deleteMyProject(projectId));
+    }
+
 
     /**
      *  프로젝트 좋아요 등록 API - 셀리나
@@ -165,7 +174,7 @@ public class ProjectController {
         if (video.isEmpty()) {
             throw new GeneralException(Code.EMPTY_VIDEO, "비디오 파일이 비어있습니다.");
         }
-        // validation: 프로젝트 제목이 최대 글자 수를 넘겼을 경우 validation
+        // validation: 프로젝트 제목이 최대 글자 수를 넘겼을 경우
         if (projectDto.getTitle().length() > 18) {
             throw new GeneralException(Code.TITLE_TOO_LONG, "연주 제목이 최대 글자(18자)를 초과했습니다.");
         }
@@ -173,6 +182,18 @@ public class ProjectController {
         // validation: 연주 정보가 최대 글자 수를 넘겼을 경우
         if (projectDto.getDescription().length() > 48) {
             throw new GeneralException(Code.DESCRIPTION_TOO_LONG, "연주에 대한 설명이 최대 글자(48자)를 초과했습니다.");
+        }
+
+        // validation: 올바르지 않은 악기 id를 사용했을 경우
+        for (Long instrumentId : projectDto.getInstrumentIds()) {
+            if (instrumentId < 1 || instrumentId > 6) {
+                throw new GeneralException(Code.INVALID_INSTRUMENT, "올바른 악기를 선택해주세요.");
+            }
+        }
+
+        // validation: 2개 이상의 악기 id를 사용했을 경우
+        if (projectDto.getInstrumentIds().size() > 1) {
+            throw new GeneralException(Code.MULTI_INSTRUMENT_ERROR, "하나의 악기만 선택할 수 있습니다.");
         }
 
         try {

@@ -7,6 +7,7 @@ import com.artistack.instrument.domain.ProjectInstrument;
 import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.InstrumentRepository;
 import com.artistack.instrument.repository.ProjectInstrumentRepository;
+import com.artistack.project.constant.Scope;
 import com.artistack.project.domain.Project;
 import com.artistack.project.domain.ProjectLike;
 import com.artistack.project.dto.ProjectDto;
@@ -61,9 +62,26 @@ public class ProjectService {
      * @param artistackId 조회할 유저의 artistackId (optional)
      * @return 조건에 맞는 프로젝트들 (profileResponse)
      */
-    public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId) {
-        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null))
+    public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId, Optional<Long> lastId) {
+        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null), lastId.orElse(null), Scope.PUBLIC)
             .map(ProjectDto::profileResponse);
+    }
+
+    /**
+     * 메이슨) 내 프로젝트를 삭제합니다
+     *
+     * @return 삭제 성공 시 true
+     */
+    public Boolean deleteMyProject(Long id) {
+        Project project = projectRepository.findById(id)
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND));
+        if (!project.getUser().getId().equals(SecurityUtil.getUserId())) {
+            throw new GeneralException(Code.FORBIDDEN, "This project is not your project");
+        }
+
+        projectInstrumentRepository.deleteByProjectId(id);
+        project.delete();
+        return true;
     }
 
     /**
@@ -74,7 +92,7 @@ public class ProjectService {
     public Page<ProjectDto> getMyWithPaging(Pageable pageable) {
         String artistackId = userRepository.findById(SecurityUtil.getUserId())
             .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND)).getArtistackId();
-        return getByConditionWithPaging(pageable, Optional.of(artistackId));
+        return getByConditionWithPaging(pageable, Optional.of(artistackId), Optional.empty());
     }
 
     // 프로젝트 좋아요 등록
@@ -83,12 +101,12 @@ public class ProjectService {
         try {
 
             User user = userRepository.findById(SecurityUtil.getUserId())
-                    .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
 
             Project project = projectRepository.findById(projectId)
-                    .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
-            if (projectLikeRepository.findByUserAndProject(user,project).isPresent()) {
+            if (projectLikeRepository.findByUserAndProject(user, project).isPresent()) {
                 throw new GeneralException(Code.PROJECT_LIKE_EXIST, "프로젝트 좋아요가 이미 존재합니다.");
             }
 
@@ -107,16 +125,16 @@ public class ProjectService {
     // 프로젝트 좋아요 취소
     public String deleteLikeProject(Long projectId) {
         User user = userRepository.findById(SecurityUtil.getUserId())
-                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+            .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
 
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
-        if (projectLikeRepository.findByUserAndProject(user,project).isEmpty()) {
+        if (projectLikeRepository.findByUserAndProject(user, project).isEmpty()) {
             throw new GeneralException(Code.PROJECT_LIKE_NOT_EXIST, "취소할 프로젝트 좋아요가 존재하지 않습니다.");
         }
 
-        projectLikeRepository.deleteByUserAndProject(user,project);
+        projectLikeRepository.deleteByUserAndProject(user, project);
 
         return "좋아요 취소가 완료되었습니다.";
     }
@@ -140,35 +158,33 @@ public class ProjectService {
             }
         }
 
+        List<Long> instrumentIds = projectDto.getInstrumentIds();
+
+        User user = userRepository.findById(SecurityUtil.getUserId())
+            .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
+
+        // 동영상을 S3에 저장한 후 URL을 가져옴
+        String videoUrl = null;
         try {
-            // 동영상을 S3에 저장한 후 URL을 가져옴
-            String videoUrl = s3UploaderService.uploadFile(video);
+            videoUrl = s3UploaderService.uploadFile(video);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 //            String videoUrl = "테스트";
 
-            List<InstrumentDto> instruments = projectDto.getInstruments();
+        Project project = projectRepository.save(projectDto.toEntity(videoUrl, prevProjectId, user));
 
-            User user = userRepository.findById(SecurityUtil.getUserId())
-                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
-
-            Project project = projectRepository.save(projectDto.toEntity(videoUrl, prevProjectId, user));
-
-            for (InstrumentDto instrumentDto : instruments) {
-                Instrument instrument = instrumentRepository.findById(instrumentDto.getId())
-                    .orElseThrow(() -> new GeneralException(Code.INVALID_INSTRUMENT, "올바른 악기를 선택해주세요."));
-                projectInstrumentRepository.save(instrumentDto.toEntity(project, instrument));
-            }
-
-            return project.getVideoUrl();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                throw e;
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-//            throw e;
+        for (Long instrumentId : instrumentIds) {
+            Instrument instrument = instrumentRepository.findById(instrumentId)
+                .orElseThrow(() -> new GeneralException(Code.INVALID_INSTRUMENT,
+                    "Controller validation failed - API 담당자에게 말해주세요!"));
+            projectInstrumentRepository.save(
+                new InstrumentDto(instrument.getId(), instrument.getName(), instrument.getImgUrl())
+                    .toEntity(project, instrument)
+            );
         }
+
+        return project.getVideoUrl();
     }
 
     // 스택 조회 - 다음 스택인지, 이전 스택인지 선택

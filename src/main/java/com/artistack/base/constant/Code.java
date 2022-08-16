@@ -41,6 +41,8 @@ public enum Code {
     PROJECT_LIKE_EXIST(2207, HttpStatus.BAD_REQUEST, "Project Like already exist"),
     PROJECT_LIKE_NOT_EXIST(2208, HttpStatus.BAD_REQUEST, "Project Like doesn't exist"),
     INVALID_INSTRUMENT(2301, HttpStatus.BAD_REQUEST, "Invalid instrument"),
+    MULTI_INSTRUMENT_ERROR(2302, HttpStatus.BAD_REQUEST, "Cannot use multi instrument"),
+
     INTERNAL_ERROR(4000, HttpStatus.INTERNAL_SERVER_ERROR, "Internal error"),
     DATA_ACCESS_ERROR(4001, HttpStatus.INTERNAL_SERVER_ERROR, "Data access error"),
     KAKAO_SERVER_ERROR(4002, HttpStatus.INTERNAL_SERVER_ERROR , "Kakao server error"),
@@ -59,6 +61,7 @@ public enum Code {
     EXPIRED_JWT(5006, HttpStatus.UNAUTHORIZED, "Jwt expired. Reissue it"),
     UNSUPPORTED_JWT(5007, HttpStatus.UNAUTHORIZED, "Unsupported jwt format"),
     ILLEGAL_JWT(5008, HttpStatus.UNAUTHORIZED, "Illegal jwt format"),
+    FORBIDDEN(5009, HttpStatus.FORBIDDEN, "Forbidden"),
     ;
 
 
