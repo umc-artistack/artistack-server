@@ -177,7 +177,7 @@ public class ProjectService {
         for (Long instrumentId : instrumentIds) {
             Instrument instrument = instrumentRepository.findById(instrumentId)
                 .orElseThrow(() -> new GeneralException(Code.INVALID_INSTRUMENT,
-                    "Controller validation failed - API 담당자에게 말해주세요!"));
+                    "올바른 악기를 선택해 주세요."));
             projectInstrumentRepository.save(
                 new InstrumentDto(instrument.getId(), instrument.getName(), instrument.getImgUrl())
                     .toEntity(project, instrument)
@@ -214,7 +214,9 @@ public class ProjectService {
 
             List<InstrumentDto> instruments = getInstrumentDtoFromProject(project);
 
-            UserDto userDto = UserDto.stackResponse(user, instruments);
+            ProjectDto projectDto = ProjectDto.stackResponse(project);
+
+            UserDto userDto = UserDto.stackResponse(user, instruments, projectDto);
             stackers.add(userDto);
 
             prevProjectId = project.getPrevProjectId();
@@ -236,11 +238,12 @@ public class ProjectService {
 
             List<InstrumentDto> instruments = getInstrumentDtoFromProject(project);
 
-            // userDto는 ListInstrumentDto(id, name, imgUrl인데 id만 반환할거임)를 사용
             User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
 
-            UserDto userDto = UserDto.stackResponse(user, instruments);
+            ProjectDto projectDto = ProjectDto.stackResponse(project);
+
+            UserDto userDto = UserDto.stackResponse(user, instruments, projectDto);
             stackers.add(userDto);
         }
 

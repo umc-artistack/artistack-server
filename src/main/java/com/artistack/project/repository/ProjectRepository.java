@@ -18,6 +18,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     Optional<Project> findById(Long id);
 
+    Optional<Project> findByUserId(Long id);
+
     // TODO: Optional로 수정할 것!
     @Query(value = "select p.isStackable from Project p where p.id = ?1")
     Boolean findStackableById(Long id);
