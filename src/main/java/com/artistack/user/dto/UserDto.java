@@ -1,5 +1,6 @@
 package com.artistack.user.dto;
 
+
 import static com.artistack.user.constant.UserConstraint.ARTISTACK_ID_MAX_LENGTH;
 import static com.artistack.user.constant.UserConstraint.ARTISTACK_ID_MIN_LENGTH;
 import static com.artistack.user.constant.UserConstraint.DESCRIPTION_MAX_LENGTH;
@@ -13,6 +14,7 @@ import com.artistack.instrument.domain.UserInstrument;
 import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.UserInstrumentRepository;
 import com.artistack.oauth.constant.ProviderType;
+import com.artistack.project.dto.ProjectDto;
 import com.artistack.user.constant.Role;
 import com.artistack.user.domain.User;
 import com.artistack.user.repository.UserRepository;
@@ -38,6 +40,7 @@ public class UserDto {
     private String description;
     private String profileImgUrl;
     private List<InstrumentDto> instruments;
+    private ProjectDto project;
     private ProviderType providerType;
     private Role role;
 
@@ -72,7 +75,9 @@ public class UserDto {
             .build();
     }
 
+
     public static UserDto previewResponse(User user) {
+
         return UserDto.builder()
             .artistackId(user.getArtistackId())
             .nickname(user.getNickname())
@@ -80,11 +85,12 @@ public class UserDto {
             .build();
     }
 
-    public static UserDto stackResponse(User user, List<InstrumentDto> instruments) {
+    public static UserDto stackResponse(User user, List<InstrumentDto> instruments, ProjectDto project) {
         return UserDto.builder()
             .nickname(user.getNickname())
             .profileImgUrl(user.getProfileImgUrl())
             .instruments(instruments)
+            .project(project)
             .build();
     }
 
