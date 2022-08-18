@@ -9,8 +9,10 @@ import com.artistack.user.dto.UserDto;
 import com.artistack.util.SecurityUtil;
 import io.swagger.annotations.ApiImplicitParams;
 import java.util.List;
-import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -131,7 +133,7 @@ public class ProjectController {
     @ApiOperation(value = "스택 조회")
     @ApiImplicitParams( value = {
         @ApiImplicitParam(name = "projectId", value = "현재 프로젝트 id", required = true, dataType = "long", paramType = "path"),
-        @ApiImplicitParam(name = "sequence", value = "순서 (prev와 next만 가능)", required = true, dataType = "string", paramType = "path")})
+        @ApiImplicitParam(name = "sequence", value = "순서(prev or next)", required = true, dataType = "string", paramType = "path")})
     @GetMapping("/{projectId}/{sequence}")
     public DataResponseDto<Object> getStack(@PathVariable Long projectId, @PathVariable String sequence) {
         // validation
@@ -161,8 +163,8 @@ public class ProjectController {
             + "번거롭지만 dto는 .json 파일로 업로드해주세요..! 포스트맨에서 테스트할 때는, Content-Type을 application/json으로 설정하여 텍스트로 입력할 수 있습니다.<br>"
             + "scope는 0부터 시작하며, 숫자, 문자열 중 편한 것을 선택하여 입력해주세요. 0은 전체 공개(PUBLIC), 1은 비공개(PRIVATE)입니다."
     )
-    @ApiImplicitParam(name = "prevProjectId", value = "이전 프로젝트 id", dataType = "integer", defaultValue = "0")
-    @PostMapping(value = "/{prevProjectId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ApiImplicitParam(name = "prevProjectId", value = "이전 프로젝트 id", dataType = "long", defaultValue = "0")
+    @PostMapping(value = "/{prevProjectId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public DataResponseDto<Object> uploadProject(
         @PathVariable Long prevProjectId,
         @RequestPart(value = "video") MultipartFile video,

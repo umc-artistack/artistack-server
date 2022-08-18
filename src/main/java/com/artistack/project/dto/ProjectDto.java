@@ -93,6 +93,22 @@ public class ProjectDto {
 
     }
 
+    public static ProjectDto stackResponse(Project project) {
+        return ProjectDto.builder()
+            .videoUrl(project.getVideoUrl())
+            .title(project.getTitle())
+            .description(project.getDescription())
+            .bpm(project.getBpm())
+            .codeFlow(project.getCodeFlow())
+            .scope(project.getScope())
+            .isStackable(project.getIsStackable())
+            .viewCount(project.getViewCount())
+            .prevProjectId(project.getPrevProjectId())
+            .likeCount(project.getLikeCount())
+            .stackCount(project.getStackCount())
+            .build();
+    }
+
     public static ProjectDto insertProject(String title, String description, String bpm, String codeFlow,
         List<Long> instrumentIds, Scope scope, Boolean isStackable) {
         return ProjectDto.builder()
