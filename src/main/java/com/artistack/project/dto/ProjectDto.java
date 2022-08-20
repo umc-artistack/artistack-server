@@ -46,6 +46,8 @@ public class ProjectDto {
 
     private List<InstrumentDto> instruments;
 
+    private List<Long> instrumentIds;
+
     private Integer likeCount;
 
     private Integer stackCount;
@@ -91,14 +93,30 @@ public class ProjectDto {
 
     }
 
+    public static ProjectDto stackResponse(Project project) {
+        return ProjectDto.builder()
+            .videoUrl(project.getVideoUrl())
+            .title(project.getTitle())
+            .description(project.getDescription())
+            .bpm(project.getBpm())
+            .codeFlow(project.getCodeFlow())
+            .scope(project.getScope())
+            .isStackable(project.getIsStackable())
+            .viewCount(project.getViewCount())
+            .prevProjectId(project.getPrevProjectId())
+            .likeCount(project.getLikeCount())
+            .stackCount(project.getStackCount())
+            .build();
+    }
+
     public static ProjectDto insertProject(String title, String description, String bpm, String codeFlow,
-        List<InstrumentDto> instruments, Scope scope, Boolean isStackable) {
+        List<Long> instrumentIds, Scope scope, Boolean isStackable) {
         return ProjectDto.builder()
             .title(title)
             .description(description)
             .bpm(bpm)
             .codeFlow(codeFlow)
-            .instruments(instruments)
+            .instrumentIds(instrumentIds)
             .scope(scope)
             .isStackable(isStackable)
             .build();
