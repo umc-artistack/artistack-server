@@ -83,8 +83,7 @@ class ProjectControllerTest extends BaseControllerTest {
     @DisplayName("등록 - 다른 프로젝트 위에")
     void uploadTest() throws Exception {
         uploadInitialTest();
-        Integer projectCnt = Long.valueOf(projectRepository.count()).intValue();
-        uploadProject(accessToken, projectCnt, Scope.PUBLIC, true, Code.OK.getCode());
+        uploadProject(accessToken, projectRepository.findAll().get(0).getId().intValue(), Scope.PUBLIC, true, Code.OK.getCode());
     }
 
     String uploadProject(String accessToken, Integer prev, Scope scope, Boolean isStackable, int code)
@@ -147,12 +146,10 @@ class ProjectControllerTest extends BaseControllerTest {
         List<ProjectDto> res = getProjects(accessToken, pageSize, Code.OK.getCode());
         Collections.reverse(res);
 
-        for (int i = 0; i < res.size(); i++) {
+        for (int i = 0; i < uploadUrls.size(); i++) {
             then(res.get(i).getVideoUrl()).isEqualTo(uploadUrls.get(i));
         }
-
-        then(res.size()).isEqualTo(Math.min(projectCnt + otherUserProjectCnt, pageSize));
-
+        
         Collections.reverse(res);
         int lastIdx = 3;
         List<ProjectDto> lastIdRes = getProjectsByLastId(accessToken, res.get(lastIdx).getId().intValue(), pageSize, Code.OK.getCode());
