@@ -11,11 +11,13 @@ import com.artistack.project.constant.Scope;
 import com.artistack.project.domain.Project;
 import com.artistack.project.domain.ProjectLike;
 import com.artistack.project.dto.ProjectDto;
+import com.artistack.project.dto.ProjectLikeDto;
 import com.artistack.project.repository.ProjectLikeRepository;
 import com.artistack.project.repository.ProjectRepository;
 import com.artistack.user.domain.User;
 import com.artistack.user.dto.UserDto;
 import com.artistack.user.repository.UserRepository;
+import com.artistack.user.service.UserService;
 import com.artistack.util.SecurityUtil;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProjectService {
 
     private final S3UploaderService s3UploaderService;
+    private final UserService userService;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final InstrumentRepository instrumentRepository;
@@ -107,7 +110,7 @@ public class ProjectService {
                 .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
             if (projectLikeRepository.findByUserAndProject(user, project).isPresent()) {
-                throw new GeneralException(Code.PROJECT_LIKE_EXIST, "프로젝트 좋아요가 이미 존재합니다.");
+                throw new GeneralException(Code.USER_PROJECT_LIKE_EXIST, "프로젝트 좋아요가 이미 존재합니다.");
             }
 
             ProjectLike projectLike = projectLikeRepository.save(ProjectLike.of(user, project));
@@ -131,12 +134,30 @@ public class ProjectService {
             .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
         if (projectLikeRepository.findByUserAndProject(user, project).isEmpty()) {
-            throw new GeneralException(Code.PROJECT_LIKE_NOT_EXIST, "취소할 프로젝트 좋아요가 존재하지 않습니다.");
+            throw new GeneralException(Code.USER_PROJECT_LIKE_NOT_EXIST, "취소할 프로젝트 좋아요가 존재하지 않습니다.");
         }
 
         projectLikeRepository.deleteByUserAndProject(user, project);
 
         return "좋아요 취소가 완료되었습니다.";
+    }
+
+    // 프로젝트 좋아요한 유저 조회
+    @Transactional
+    public List<ProjectLikeDto> getProjectLikeUsers(Long projectId) {
+
+        // TODO: pageable 적용
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+
+        List<ProjectLike> projectLikes = projectLikeRepository.findByProject(project);
+
+        if (projectLikes.isEmpty()) {
+            throw new GeneralException(Code.PROJECT_LIKE_NOT_EXIST, "프로젝트 좋아요가 존재하지 않습니다.");
+        }
+
+        return projectLikes.stream().map(ProjectLikeDto::projectLikeUsersResponse).collect(Collectors.toList());
     }
 
     // 프로젝트 게시
