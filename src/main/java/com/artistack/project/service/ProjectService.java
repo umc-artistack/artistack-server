@@ -47,17 +47,6 @@ public class ProjectService {
     private final ProjectInstrumentRepository projectInstrumentRepository;
     private final ProjectLikeRepository projectLikeRepository;
 
-    // 프로젝트 전체 조회
-    public List<ProjectDto> getAll() {
-        return projectRepository.findAll().stream().map(ProjectDto::projectResponse).collect(Collectors.toList());
-    }
-
-    // 프로젝트 정보 조회
-    public ProjectDto getById(Long projectId) {
-        return projectRepository.findById(projectId)
-            .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository))
-            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
-    }
 
     /**
      * 메이슨) 조건에 맞는 프로젝트들을 페이징 기능과 함께 반환합니다
@@ -66,6 +55,10 @@ public class ProjectService {
      * @return 조건에 맞는 프로젝트들 (profileResponse)
      */
     public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId, Optional<Long> lastId) {
+
+        String myArtistackId = userRepository.findById(SecurityUtil.getUserId())
+                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND)).getArtistackId();
+
         return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null), lastId.orElse(null), Scope.PUBLIC)
             .map(ProjectDto::profileResponse);
     }
@@ -96,6 +89,13 @@ public class ProjectService {
         String artistackId = userRepository.findById(SecurityUtil.getUserId())
             .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND)).getArtistackId();
         return getByConditionWithPaging(pageable, Optional.of(artistackId), Optional.empty());
+    }
+
+    // 프로젝트 정보 조회
+    public ProjectDto getById(Long projectId) {
+        return projectRepository.findById(projectId)
+                .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository, projectLikeRepository, userRepository))
+                .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
     }
 
     // 프로젝트 좋아요 등록
