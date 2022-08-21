@@ -68,7 +68,10 @@ public class ProjectDto {
     }
 
     // 메이슨
-    public static ProjectDto profileResponse(Project project) {
+    public static ProjectDto profileResponse(Project project, ProjectLikeRepository projectLikeRepository, UserRepository userRepository) {
+
+        Boolean isLiked = !isEmpty(projectLikeRepository) && !projectLikeRepository.findByUserAndProject(userRepository.findById(SecurityUtil.getUserId()).orElse(null), project).isEmpty();
+
         return ProjectDto.builder()
             .id(project.getId())
             .title(project.getTitle())
@@ -76,6 +79,7 @@ public class ProjectDto {
             .stackCount(project.getStackCount())
             .viewCount(project.getViewCount())
             .likeCount(project.getLikeCount())
+            .isLiked(isLiked)
             .build();
     }
 

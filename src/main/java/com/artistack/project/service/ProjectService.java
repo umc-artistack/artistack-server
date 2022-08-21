@@ -33,6 +33,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import static org.springframework.util.ObjectUtils.isEmpty;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -60,7 +62,7 @@ public class ProjectService {
                 .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND)).getArtistackId();
 
         return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null), lastId.orElse(null), Scope.PUBLIC)
-            .map(ProjectDto::profileResponse);
+            .map(project -> ProjectDto.profileResponse(project, projectLikeRepository, userRepository));
     }
 
     /**
