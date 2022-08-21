@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.artistack.base.GeneralException;
 import com.artistack.base.constant.Code;
+import com.artistack.instrument.dto.InstrumentDto;
+import com.artistack.jwt.dto.JwtDto;
 
 import com.artistack.instrument.domain.Instrument;
 import com.artistack.instrument.domain.ProjectInstrument;
@@ -219,12 +221,10 @@ class ProjectControllerTest extends BaseControllerTest {
         List<ProjectDto> res = getProjects(accessToken, pageSize, Code.OK.getCode());
         Collections.reverse(res);
 
-        for (int i = 0; i < res.size(); i++) {
+        for (int i = 0; i < uploadUrls.size(); i++) {
             then(res.get(i).getVideoUrl()).isEqualTo(uploadUrls.get(i));
         }
-
-        then(res.size()).isEqualTo(Math.min(projectCnt + otherUserProjectCnt, pageSize));
-
+        
         Collections.reverse(res);
         int lastIdx = 3;
         List<ProjectDto> lastIdRes = getProjectsByLastId(accessToken, res.get(lastIdx).getId().intValue(), pageSize, Code.OK.getCode());
