@@ -11,7 +11,6 @@ import com.artistack.project.constant.Scope;
 import com.artistack.project.domain.Project;
 import com.artistack.project.domain.ProjectLike;
 import com.artistack.project.dto.ProjectDto;
-import com.artistack.project.dto.ProjectLikeDto;
 import com.artistack.project.repository.ProjectLikeRepository;
 import com.artistack.project.repository.ProjectRepository;
 import com.artistack.user.domain.User;
@@ -146,9 +145,7 @@ public class ProjectService {
 
     // 프로젝트 좋아요한 유저 조회
     @Transactional
-    public List<ProjectLikeDto> getProjectLikeUsers(Long projectId) {
-
-        // TODO: pageable 적용
+    public List<UserDto> getProjectLikeUsers(Long projectId) {
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
@@ -159,7 +156,7 @@ public class ProjectService {
             throw new GeneralException(Code.PROJECT_LIKE_NOT_EXIST, "프로젝트 좋아요가 존재하지 않습니다.");
         }
 
-        return projectLikes.stream().map(ProjectLikeDto::projectLikeUsersResponse).collect(Collectors.toList());
+        return projectLikes.stream().map(UserDto::projectLikeUsersResponse).collect(Collectors.toList());
     }
 
     // 프로젝트 게시
