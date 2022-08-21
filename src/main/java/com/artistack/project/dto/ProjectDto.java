@@ -71,6 +71,7 @@ public class ProjectDto {
     public static ProjectDto profileResponse(Project project) {
         return ProjectDto.builder()
             .id(project.getId())
+            .title(project.getTitle())
             .videoUrl(project.getVideoUrl())
             .stackCount(project.getStackCount())
             .viewCount(project.getViewCount())
