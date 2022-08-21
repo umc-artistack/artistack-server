@@ -111,6 +111,7 @@ public class ProjectDto {
 
     public static ProjectDto stackResponse(Project project) {
         return ProjectDto.builder()
+            .id(project.getId())
             .videoUrl(project.getVideoUrl())
             .title(project.getTitle())
             .description(project.getDescription())
