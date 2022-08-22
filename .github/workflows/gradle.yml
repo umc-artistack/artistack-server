@@ -67,7 +67,14 @@ jobs:
         
     # Gradle 사용. arguments를 붙이면 뒤에 그대로 실행됨
     # 이 워크플로우는 gradle clean build를 수행
+#     - name: Build with Gradle
+#       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+#       with:
+#         arguments: clean build
+
+    # gradle 권한 부여 및 빌드
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
     - name: Build with Gradle
-      uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-      with:
-        arguments: clean build
+      run: ./gradlew clean build
