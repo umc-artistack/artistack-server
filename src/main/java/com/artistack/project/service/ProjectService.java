@@ -56,10 +56,6 @@ public class ProjectService {
      * @return 조건에 맞는 프로젝트들 (profileResponse)
      */
     public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId, Optional<Long> lastId) {
-
-        String myArtistackId = userRepository.findById(SecurityUtil.getUserId())
-                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND)).getArtistackId();
-
         return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null), lastId.orElse(null), Scope.PUBLIC)
             .map(project -> ProjectDto.profileResponse(project, projectLikeRepository, userRepository));
     }
@@ -145,18 +141,18 @@ public class ProjectService {
 
     // 프로젝트 좋아요한 유저 조회
     @Transactional
-    public List<UserDto> getProjectLikeUsers(Long projectId) {
+    public Page<UserDto> getProjectLikeUsersWithPaging(Pageable pageable, Long projectId) {
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
-        List<ProjectLike> projectLikes = projectLikeRepository.findByProject(project);
+        Page<ProjectLike> projectLikes = projectLikeRepository.findByProject(pageable, project);
 
-        if (projectLikes.isEmpty()) {
+        if (projectLikes.getContent().isEmpty()) {
             throw new GeneralException(Code.PROJECT_LIKE_NOT_EXIST, "프로젝트 좋아요가 존재하지 않습니다.");
         }
 
-        return projectLikes.stream().map(UserDto::projectLikeUsersResponse).collect(Collectors.toList());
+        return projectLikes.map(UserDto::projectLikeUsersResponse);
     }
 
     // 프로젝트 게시

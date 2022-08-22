@@ -135,9 +135,10 @@ public class ProjectController {
     @ApiImplicitParam(name = "projectId", value = "정보를 조회할 프로젝트 id", required = true, dataType = "long", paramType = "path")
     @GetMapping("/{projectId}/like/users")
     public DataResponseDto<Object> getProjectLikeUsers(
+            Pageable pageable,
             @PathVariable Long projectId
     )  {
-        return DataResponseDto.of(projectService.getProjectLikeUsers(projectId));
+        return DataResponseDto.of(projectService.getProjectLikeUsersWithPaging(pageable, projectId));
     }
 
     /**
