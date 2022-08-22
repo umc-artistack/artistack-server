@@ -12,14 +12,6 @@ import java.util.function.Predicate;
 @Getter
 @RequiredArgsConstructor
 public enum Code {
-
-    // 충돌 방지를 위한 Code format
-    // X1XXX: 제이
-    // X2XXX: 셀리나
-    // X3XXX: 메이슨
-    // ex) 메이슨이 닉네임 중복 에러코드를 만든다면
-    // USER_NICKNAME_DUPLICATED(13010, HttpStatus.BAD_REQUEST, "User nickname duplicated"),
-
     OK(0, HttpStatus.OK, "Ok"),
 
     BAD_REQUEST(2000, HttpStatus.BAD_REQUEST, "Bad request"),
