@@ -35,6 +35,35 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
+
+    # create application-dev.properties
+    - name: make application-dev.properties
+      if: contains(github.ref, 'main') # branch가 main일 때
+      run: |
+          # resources 경로로 이동
+          cd ./src/main/resources
+          
+          # application-dev.properties 파일 생성
+          touch ./application-dev.properties
+          
+          # Github Actions에서 설정한 값을 application-dev.properties 파일에 쓰기
+          echo "${{ secrets.PROPERTIES_DEV }}" > ./application-dev.properties
+      shell: bash
+      
+    # create aws.yml
+    - name: make aws.yml
+      if: contains(github.ref, 'main') # branch가 main일 때
+      run: |
+          # resources 경로로 이동
+          cd ./src/main/resources
+          
+          # aws.yml 파일 생성
+          touch ./aws.yml
+          
+          # Github Actions에서 설정한 값을 aws.yml 파일에 쓰기
+          echo "${{ secrets.AWS_YML }}" > ./aws.yml
+      shell: bash
+      
         
     # Gradle 사용. arguments를 붙이면 뒤에 그대로 실행됨
     # 이 워크플로우는 gradle clean build를 수행
