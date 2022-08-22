@@ -14,8 +14,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
-    Page<Project> findAll(Pageable pageable);
-
     Optional<Project> findById(Long id);
 
     // TODO: Optional로 수정할 것!

@@ -60,7 +60,7 @@ public class Project extends BaseTimeEntity {
     @Formula("(SELECT count(*) FROM project p where p.prev_project_id = id)")
     private Integer stackCount;
 
-    @Formula("(SELECT count(*) FROM project_like pl where pl.project_id = id)")
+    @Formula("(SELECT count(*) FROM project_like pl INNER JOIN user u where pl.project_id = id AND u.id = pl.user_id AND u.role = 'USER')")
     private Integer likeCount;
 
     @Builder
