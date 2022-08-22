@@ -38,8 +38,11 @@ public enum Code {
     PREV_PROJECT_NOT_STACKABLE(2205, HttpStatus.BAD_REQUEST, "Previous project isn't stackable"),
     INVALID_SEQUENCE(2206, HttpStatus.BAD_REQUEST, "Invalid sequence"),
 
-    PROJECT_LIKE_EXIST(2207, HttpStatus.BAD_REQUEST, "Project Like already exist"),
-    PROJECT_LIKE_NOT_EXIST(2208, HttpStatus.BAD_REQUEST, "Project Like doesn't exist"),
+    USER_PROJECT_LIKE_EXIST(2207, HttpStatus.BAD_REQUEST, "User Project Like already exist"),
+    USER_PROJECT_LIKE_NOT_EXIST(2208, HttpStatus.BAD_REQUEST, "User Project Like doesn't exist"),
+    PROJECT_LIKE_EXIST(2209, HttpStatus.BAD_REQUEST, "Project Like already exist"),
+    PROJECT_LIKE_NOT_EXIST(2210, HttpStatus.BAD_REQUEST, "Project Like doesn't exist"),
+
     INVALID_INSTRUMENT(2301, HttpStatus.BAD_REQUEST, "Invalid instrument"),
     MULTI_INSTRUMENT_ERROR(2302, HttpStatus.BAD_REQUEST, "Cannot use multi instrument"),
 
