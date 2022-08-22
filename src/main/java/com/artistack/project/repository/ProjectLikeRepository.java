@@ -14,7 +14,8 @@ import java.util.Optional;
 @Repository
 public interface ProjectLikeRepository extends JpaRepository<ProjectLike, Long> {
 
-    Page<ProjectLike> findByProject(Pageable pageable, Project project);
+    @Query(value = "SELECT pl FROM ProjectLike pl WHERE pl.project = :project AND pl.user.role = 'USER'")
+    Page<ProjectLike> getByProjectWithPaging(Pageable pageable, Project project);
 
     Optional<ProjectLike> findByUserAndProject(User user, Project project);
 

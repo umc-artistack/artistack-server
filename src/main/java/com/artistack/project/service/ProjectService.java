@@ -146,7 +146,7 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
-        Page<ProjectLike> projectLikes = projectLikeRepository.findByProject(pageable, project);
+        Page<ProjectLike> projectLikes = projectLikeRepository.getByProjectWithPaging(pageable, project);
 
         if (projectLikes.getContent().isEmpty()) {
             throw new GeneralException(Code.PROJECT_LIKE_NOT_EXIST, "프로젝트 좋아요가 존재하지 않습니다.");
