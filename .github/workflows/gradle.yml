@@ -25,6 +25,17 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         
+    # gradle caching
+    - name: Gradle Caching
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+        
     # Gradle 사용. arguments를 붙이면 뒤에 그대로 실행됨
     # 이 워크플로우는 gradle clean build를 수행
     - name: Build with Gradle
