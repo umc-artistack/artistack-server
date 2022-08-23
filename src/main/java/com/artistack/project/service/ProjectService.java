@@ -90,6 +90,11 @@ public class ProjectService {
 
     // 프로젝트 정보 조회
     public ProjectDto getById(Long projectId) {
+
+        if (projectRepository.findById(projectId).get().getUser().getRole().getKey() != "ROLE_USER") {
+            throw new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다.");
+        }
+
         return projectRepository.findById(projectId)
             .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository, projectLikeRepository,
                 userRepository))
