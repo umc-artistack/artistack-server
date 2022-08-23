@@ -20,10 +20,8 @@ import com.artistack.user.service.UserService;
 import com.artistack.util.SecurityUtil;
 import java.io.IOException;
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,8 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.springframework.util.ObjectUtils.isEmpty;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -41,7 +37,6 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 public class ProjectService {
 
     private final S3UploaderService s3UploaderService;
-    private final UserService userService;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final InstrumentRepository instrumentRepository;
@@ -55,9 +50,13 @@ public class ProjectService {
      * @param artistackId 조회할 유저의 artistackId (optional)
      * @return 조건에 맞는 프로젝트들 (profileResponse)
      */
-    public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId, Optional<Long> lastId) {
-        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null), lastId.orElse(null), Scope.PUBLIC)
-            .map(project -> ProjectDto.profileResponse(project, projectLikeRepository, userRepository));
+    public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId,
+        Optional<Long> lastId) {
+        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null),
+                lastId.orElse(null), Scope.PUBLIC)
+            .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository, projectLikeRepository,
+                userRepository, getPrevStackers(project.getId()))
+            );
     }
 
     /**
@@ -91,8 +90,9 @@ public class ProjectService {
     // 프로젝트 정보 조회
     public ProjectDto getById(Long projectId) {
         return projectRepository.findById(projectId)
-                .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository, projectLikeRepository, userRepository))
-                .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+            .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository, projectLikeRepository,
+                userRepository))
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
     }
 
     // 프로젝트 좋아요 등록
@@ -144,7 +144,7 @@ public class ProjectService {
     public Page<UserDto> getProjectLikeUsersWithPaging(Pageable pageable, Long projectId) {
 
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
         Page<ProjectLike> projectLikes = projectLikeRepository.getByProjectWithPaging(pageable, project);
 
@@ -219,8 +219,7 @@ public class ProjectService {
 
         Long prevProjectId = projectRepository.findById(projectId)
             .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."))
-                .getPrevProjectId();
-
+            .getPrevProjectId();
 
         while (prevProjectId != 0) {
             Project project = projectRepository.findById(prevProjectId)
