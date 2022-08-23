@@ -56,6 +56,8 @@ public class ProjectDto {
 
     private List<UserDto> prevStackers;
 
+    private Integer prevStackCount;
+
     private Integer likeCount;
 
     private Integer stackCount;
@@ -116,6 +118,7 @@ public class ProjectDto {
                 e -> e.findByProjectId(project.getId()).stream().map(ProjectInstrument::getInstrument)
                     .map(InstrumentDto::response).collect(Collectors.toList())).orElse(null))
             .prevStackers(prevStackers)
+            .prevStackCount(prevStackers.size())
             .stackCount(project.getStackCount())
             .likeCount(project.getLikeCount())
             .isLiked(isLiked)

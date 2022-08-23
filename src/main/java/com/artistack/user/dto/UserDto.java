@@ -10,6 +10,7 @@ import static org.apache.logging.log4j.util.Strings.isBlank;
 
 import com.artistack.base.GeneralException;
 import com.artistack.base.constant.Code;
+import com.artistack.instrument.domain.Instrument;
 import com.artistack.instrument.domain.UserInstrument;
 import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.UserInstrumentRepository;
@@ -94,6 +95,14 @@ public class UserDto {
             .profileImgUrl(user.getProfileImgUrl())
             .instruments(instruments)
             .project(project)
+            .build();
+    }
+
+    public static UserDto SearchStackResponse(User user, List<InstrumentDto> instruments) {
+        return UserDto.builder()
+            .nickname(user.getNickname())
+            .profileImgUrl(user.getProfileImgUrl())
+            .instruments(instruments)
             .build();
     }
 
