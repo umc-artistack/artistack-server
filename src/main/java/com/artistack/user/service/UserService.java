@@ -80,6 +80,7 @@ public class UserService {
                 oAuthService.unlinkKakaoAccount(userId);
                 break;
             case APPLE:
+                oAuthService.revokeAppleAccount(userId);
                 break;
         }
 

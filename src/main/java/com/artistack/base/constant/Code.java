@@ -12,14 +12,6 @@ import java.util.function.Predicate;
 @Getter
 @RequiredArgsConstructor
 public enum Code {
-
-    // 충돌 방지를 위한 Code format
-    // X1XXX: 제이
-    // X2XXX: 셀리나
-    // X3XXX: 메이슨
-    // ex) 메이슨이 닉네임 중복 에러코드를 만든다면
-    // USER_NICKNAME_DUPLICATED(13010, HttpStatus.BAD_REQUEST, "User nickname duplicated"),
-
     OK(0, HttpStatus.OK, "Ok"),
 
     BAD_REQUEST(2000, HttpStatus.BAD_REQUEST, "Bad request"),
@@ -37,10 +29,14 @@ public enum Code {
     PREV_PROJECT_NOT_EXIST(2204, HttpStatus.BAD_REQUEST, "Previous project doesn't exist"),
     PREV_PROJECT_NOT_STACKABLE(2205, HttpStatus.BAD_REQUEST, "Previous project isn't stackable"),
     INVALID_SEQUENCE(2206, HttpStatus.BAD_REQUEST, "Invalid sequence"),
-    PROJECT_LIKE_EXIST(2207, HttpStatus.BAD_REQUEST, "Project Like already exist"),
-    PROJECT_LIKE_NOT_EXIST(2208, HttpStatus.BAD_REQUEST, "Project Like doesn't exist"),
+
+    USER_PROJECT_LIKE_EXIST(2207, HttpStatus.BAD_REQUEST, "User Project Like already exist"),
+    USER_PROJECT_LIKE_NOT_EXIST(2208, HttpStatus.BAD_REQUEST, "User Project Like doesn't exist"),
+    PROJECT_LIKE_EXIST(2209, HttpStatus.BAD_REQUEST, "Project Like already exist"),
+    PROJECT_LIKE_NOT_EXIST(2210, HttpStatus.BAD_REQUEST, "Project Like doesn't exist"),
 
     INVALID_INSTRUMENT(2301, HttpStatus.BAD_REQUEST, "Invalid instrument"),
+    MULTI_INSTRUMENT_ERROR(2302, HttpStatus.BAD_REQUEST, "Cannot use multi instrument"),
 
     INTERNAL_ERROR(4000, HttpStatus.INTERNAL_SERVER_ERROR, "Internal error"),
     DATA_ACCESS_ERROR(4001, HttpStatus.INTERNAL_SERVER_ERROR, "Data access error"),
@@ -60,6 +56,7 @@ public enum Code {
     EXPIRED_JWT(5006, HttpStatus.UNAUTHORIZED, "Jwt expired. Reissue it"),
     UNSUPPORTED_JWT(5007, HttpStatus.UNAUTHORIZED, "Unsupported jwt format"),
     ILLEGAL_JWT(5008, HttpStatus.UNAUTHORIZED, "Illegal jwt format"),
+    FORBIDDEN(5009, HttpStatus.FORBIDDEN, "Forbidden"),
     ;
 
 
