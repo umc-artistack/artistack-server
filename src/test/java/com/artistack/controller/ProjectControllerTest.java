@@ -224,11 +224,6 @@ class ProjectControllerTest extends BaseControllerTest {
         for (int i = 0; i < uploadUrls.size(); i++) {
             then(res.get(i).getVideoUrl()).isEqualTo(uploadUrls.get(i));
         }
-        
-        Collections.reverse(res);
-        int lastIdx = 3;
-        List<ProjectDto> lastIdRes = getProjectsByLastId(accessToken, res.get(lastIdx).getId().intValue(), pageSize, Code.OK.getCode());
-        then(lastIdRes.get(0).getId()).isEqualTo(res.get(lastIdx + 1).getId());
     }
 
     // 메이슨

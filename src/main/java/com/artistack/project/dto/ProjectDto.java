@@ -1,18 +1,16 @@
 package com.artistack.project.dto;
 
-import com.artistack.base.GeneralException;
-import com.artistack.base.constant.Code;
+import static org.springframework.util.ObjectUtils.isEmpty;
+
 import com.artistack.instrument.domain.ProjectInstrument;
 import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.ProjectInstrumentRepository;
 import com.artistack.project.constant.Scope;
 import com.artistack.project.domain.Project;
-import com.artistack.project.domain.ProjectLike;
 import com.artistack.project.repository.ProjectLikeRepository;
 import com.artistack.user.domain.User;
 import com.artistack.user.dto.UserDto;
 import com.artistack.user.repository.UserRepository;
-import com.artistack.user.service.UserService;
 import com.artistack.util.SecurityUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
@@ -22,7 +20,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
-import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -57,6 +54,8 @@ public class ProjectDto {
 
     private List<Long> instrumentIds;
 
+    private List<UserDto> prevStackers;
+
     private Integer likeCount;
 
     private Integer stackCount;
@@ -68,9 +67,11 @@ public class ProjectDto {
     }
 
     // 메이슨
-    public static ProjectDto profileResponse(Project project, ProjectLikeRepository projectLikeRepository, UserRepository userRepository) {
+    public static ProjectDto profileResponse(Project project, ProjectLikeRepository projectLikeRepository,
+        UserRepository userRepository) {
 
-        Boolean isLiked = !isEmpty(projectLikeRepository) && !projectLikeRepository.findByUserAndProject(userRepository.findById(SecurityUtil.getUserId()).orElse(null), project).isEmpty();
+        Boolean isLiked = !isEmpty(projectLikeRepository) && !projectLikeRepository.findByUserAndProject(
+            userRepository.findById(SecurityUtil.getUserId()).orElse(null), project).isEmpty();
 
         return ProjectDto.builder()
             .id(project.getId())
@@ -84,12 +85,20 @@ public class ProjectDto {
     }
 
     public static ProjectDto projectResponse(Project project) {
-        return projectResponse(project, null, null, null);
+        return projectResponse(project, null, null, null, null);
     }
 
-    public static ProjectDto projectResponse(Project project, ProjectInstrumentRepository projectInstrumentRepository, ProjectLikeRepository projectLikeRepository, UserRepository userRepository) {
+    public static ProjectDto projectResponse(Project project, ProjectInstrumentRepository projectInstrumentRepository,
+        ProjectLikeRepository projectLikeRepository, UserRepository userRepository) {
+        return projectResponse(project, projectInstrumentRepository, projectLikeRepository, userRepository, null);
+    }
 
-        Boolean isLiked = !isEmpty(projectLikeRepository) && !projectLikeRepository.findByUserAndProject(userRepository.findById(SecurityUtil.getUserId()).orElse(null), project).isEmpty();
+
+    public static ProjectDto projectResponse(Project project, ProjectInstrumentRepository projectInstrumentRepository,
+        ProjectLikeRepository projectLikeRepository, UserRepository userRepository, List<UserDto> prevStackers) {
+
+        Boolean isLiked = !isEmpty(projectLikeRepository) && !projectLikeRepository.findByUserAndProject(
+            userRepository.findById(SecurityUtil.getUserId()).orElse(null), project).isEmpty();
 
         return ProjectDto.builder()
             .id(project.getId())
@@ -106,6 +115,7 @@ public class ProjectDto {
             .instruments(Optional.ofNullable(projectInstrumentRepository).map(
                 e -> e.findByProjectId(project.getId()).stream().map(ProjectInstrument::getInstrument)
                     .map(InstrumentDto::response).collect(Collectors.toList())).orElse(null))
+            .prevStackers(prevStackers)
             .stackCount(project.getStackCount())
             .likeCount(project.getLikeCount())
             .isLiked(isLiked)
@@ -147,16 +157,16 @@ public class ProjectDto {
     // (+) videoUrl, prevProjectId, User 추가적으로 필요
     public Project toEntity(String videoUrl, Long prevProjectId, User user) {
         return Project.builder()
-                .videoUrl(videoUrl)
-                .title(title)
-                .description(description)
-                .bpm(bpm)
-                .codeFlow(codeFlow)
-                .scope(scope)
-                .isStackable(isStackable)
-                .prevProjectId(prevProjectId)
-                .user(user)
-                .viewCount(0)
-                .build();
+            .videoUrl(videoUrl)
+            .title(title)
+            .description(description)
+            .bpm(bpm)
+            .codeFlow(codeFlow)
+            .scope(scope)
+            .isStackable(isStackable)
+            .prevProjectId(prevProjectId)
+            .user(user)
+            .viewCount(0)
+            .build();
     }
 }
