@@ -34,6 +34,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @Api(tags = "프로젝트 관련 API ")
 public class ProjectController {
+    // TODO: 모든 API에 header 적용
+
     private final ProjectService projectService;
 
     /**
@@ -123,6 +125,20 @@ public class ProjectController {
             @PathVariable Long projectId
     ) {
         return DataResponseDto.of(projectService.deleteLikeProject(projectId));
+    }
+
+    /**
+     *  프로젝트 좋아요한 사람 조회 API - 셀리나
+     *  [Get] /projects/{projectId}/like/users
+     */
+    @ApiOperation(value = "프로젝트 정보 조회", notes = "단일 프로젝트를 조회합니다. projectId를 입력해주세요.")
+    @ApiImplicitParam(name = "projectId", value = "정보를 조회할 프로젝트 id", required = true, dataType = "long", paramType = "path")
+    @GetMapping("/{projectId}/like/users")
+    public DataResponseDto<Object> getProjectLikeUsers(
+            Pageable pageable,
+            @PathVariable Long projectId
+    )  {
+        return DataResponseDto.of(projectService.getProjectLikeUsersWithPaging(pageable, projectId));
     }
 
     /**

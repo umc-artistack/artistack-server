@@ -16,13 +16,13 @@ import com.artistack.project.repository.ProjectRepository;
 import com.artistack.user.domain.User;
 import com.artistack.user.dto.UserDto;
 import com.artistack.user.repository.UserRepository;
+import com.artistack.user.service.UserService;
 import com.artistack.util.SecurityUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -44,17 +44,6 @@ public class ProjectService {
     private final ProjectInstrumentRepository projectInstrumentRepository;
     private final ProjectLikeRepository projectLikeRepository;
 
-    // 프로젝트 전체 조회
-    public List<ProjectDto> getAll() {
-        return projectRepository.findAll().stream().map(ProjectDto::projectResponse).collect(Collectors.toList());
-    }
-
-    // 프로젝트 정보 조회
-    public ProjectDto getById(Long projectId) {
-        return projectRepository.findById(projectId)
-            .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository))
-            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
-    }
 
     /**
      * 메이슨) 조건에 맞는 프로젝트들을 페이징 기능과 함께 반환합니다
@@ -62,9 +51,13 @@ public class ProjectService {
      * @param artistackId 조회할 유저의 artistackId (optional)
      * @return 조건에 맞는 프로젝트들 (profileResponse)
      */
-    public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId, Optional<Long> lastId) {
-        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null), lastId.orElse(null), Scope.PUBLIC)
-            .map(ProjectDto::profileResponse);
+    public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId,
+        Optional<Long> lastId) {
+        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null),
+                lastId.orElse(null), Scope.PUBLIC)
+            .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository, projectLikeRepository,
+                userRepository, getPrevStackers(project.getId()))
+            );
     }
 
     /**
@@ -95,6 +88,14 @@ public class ProjectService {
         return getByConditionWithPaging(pageable, Optional.of(artistackId), Optional.empty());
     }
 
+    // 프로젝트 정보 조회
+    public ProjectDto getById(Long projectId) {
+        return projectRepository.findById(projectId)
+            .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository, projectLikeRepository,
+                userRepository))
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+    }
+
     // 프로젝트 좋아요 등록
     @Transactional
     public String likeProject(Long projectId) {
@@ -107,7 +108,7 @@ public class ProjectService {
                 .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
             if (projectLikeRepository.findByUserAndProject(user, project).isPresent()) {
-                throw new GeneralException(Code.PROJECT_LIKE_EXIST, "프로젝트 좋아요가 이미 존재합니다.");
+                throw new GeneralException(Code.USER_PROJECT_LIKE_EXIST, "프로젝트 좋아요가 이미 존재합니다.");
             }
 
             ProjectLike projectLike = projectLikeRepository.save(ProjectLike.of(user, project));
@@ -131,12 +132,28 @@ public class ProjectService {
             .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
         if (projectLikeRepository.findByUserAndProject(user, project).isEmpty()) {
-            throw new GeneralException(Code.PROJECT_LIKE_NOT_EXIST, "취소할 프로젝트 좋아요가 존재하지 않습니다.");
+            throw new GeneralException(Code.USER_PROJECT_LIKE_NOT_EXIST, "취소할 프로젝트 좋아요가 존재하지 않습니다.");
         }
 
         projectLikeRepository.deleteByUserAndProject(user, project);
 
         return "좋아요 취소가 완료되었습니다.";
+    }
+
+    // 프로젝트 좋아요한 유저 조회
+    @Transactional
+    public Page<UserDto> getProjectLikeUsersWithPaging(Pageable pageable, Long projectId) {
+
+        Project project = projectRepository.findById(projectId)
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+
+        Page<ProjectLike> projectLikes = projectLikeRepository.getByProjectWithPaging(pageable, project);
+
+        if (projectLikes.getContent().isEmpty()) {
+            throw new GeneralException(Code.PROJECT_LIKE_NOT_EXIST, "프로젝트 좋아요가 존재하지 않습니다.");
+        }
+
+        return projectLikes.map(UserDto::projectLikeUsersResponse);
     }
 
     // 프로젝트 게시

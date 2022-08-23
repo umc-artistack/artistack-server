@@ -14,6 +14,9 @@ import com.artistack.instrument.domain.UserInstrument;
 import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.UserInstrumentRepository;
 import com.artistack.oauth.constant.ProviderType;
+
+import com.artistack.project.domain.ProjectLike;
+
 import com.artistack.project.dto.ProjectDto;
 import com.artistack.user.constant.Role;
 import com.artistack.user.domain.User;
@@ -92,6 +95,14 @@ public class UserDto {
             .instruments(instruments)
             .project(project)
             .build();
+    }
+
+    public static UserDto projectLikeUsersResponse(ProjectLike projectLike) {
+        return UserDto.builder()
+                .artistackId(projectLike.getUser().getArtistackId())
+                .nickname(projectLike.getUser().getNickname())
+                .profileImgUrl(projectLike.getUser().getProfileImgUrl())
+                .build();
     }
 
     public User toEntity(UserRepository userRepository) {
