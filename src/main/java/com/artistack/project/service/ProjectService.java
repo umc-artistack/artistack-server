@@ -92,7 +92,7 @@ public class ProjectService {
     public ProjectDto getById(Long projectId) {
 
         if (projectRepository.findById(projectId).get().getUser().getRole().getKey() != "ROLE_USER") {
-            throw new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다.");
+            throw new GeneralException(Code.USER_ROLE_NOT_USER, "올바른 역할을 가진 유저가 아닙니다.");
         }
 
         return projectRepository.findById(projectId)
