@@ -107,7 +107,7 @@ public class ProjectService {
 
         return projectRepository.findById(projectId)
             .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository, projectLikeRepository,
-                userRepository))
+                userRepository, getPrevStackers(project.getId(), false, true)))
             .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
     }
 

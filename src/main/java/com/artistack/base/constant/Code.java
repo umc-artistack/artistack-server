@@ -23,7 +23,7 @@ public enum Code {
     NICKNAME_FORMAT_ERROR(2105, HttpStatus.BAD_REQUEST, "Nickname format error"),
     INSTRUMENT_ID_NOT_VALID(2106, HttpStatus.BAD_REQUEST, "Instrument id not valid"),
     USER_ROLE_NOT_USER(2110, HttpStatus.BAD_REQUEST, "Not a user with a user role"),
-    PROJECT_SCOPE_NOT_PUBLIC(2110, HttpStatus.BAD_REQUEST, "Not a project with a public scope"),
+    PROJECT_SCOPE_NOT_PUBLIC(2111, HttpStatus.BAD_REQUEST, "Not a project with a public scope"),
 
     EMPTY_VIDEO(2201, HttpStatus.BAD_REQUEST, "Video file is empty"),
     TITLE_TOO_LONG(2202, HttpStatus.BAD_REQUEST, "Title is too long"),
