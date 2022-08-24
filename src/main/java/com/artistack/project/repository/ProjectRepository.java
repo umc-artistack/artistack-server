@@ -4,6 +4,7 @@ import com.artistack.project.constant.Scope;
 import com.artistack.project.domain.Project;
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,8 +14,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
-    Page<Project> findAll(Pageable pageable);
-
     Optional<Project> findById(Long id);
 
     // TODO: Optional로 수정할 것!
@@ -23,7 +22,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     List<Project> findAllByPrevProjectId(Long id);
 
-    Optional<Project> findProjectByPrevProjectId(Long id);
+    Project findTopByOrderByIdDesc();
 
     // 메이슨
     @Query(value = "SELECT p FROM Project p WHERE (:artistackId IS NULL OR p.user.artistackId = :artistackId) AND (:lastId IS NULL OR p.id < :lastId) AND p.scope = :scope")
