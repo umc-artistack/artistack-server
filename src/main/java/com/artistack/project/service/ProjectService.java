@@ -97,12 +97,12 @@ public class ProjectService {
 
         Project p = projectRepository.findById(projectId).get();
 
-        if (p.getUser().getRole().getKey() != "ROLE_USER") {
-            throw new GeneralException(Code.USER_ROLE_NOT_USER, "올바른 역할을 가진 유저가 아닙니다.");
-        }
-
         if (p.getScope().name() != "PUBLIC") {
             throw new GeneralException(Code.PROJECT_SCOPE_NOT_PUBLIC, "올바른 공개범위를 가진 프로젝트가 아닙니다.");
+        }
+
+        if (p.getUser().getRole().getKey() != "ROLE_USER") {
+            throw new GeneralException(Code.USER_ROLE_NOT_USER, "올바른 역할을 가진 유저가 아닙니다.");
         }
 
         return projectRepository.findById(projectId)
