@@ -94,6 +94,29 @@ public class ProjectService {
         return getByConditionWithPaging(pageable, Optional.of(artistackId), Optional.empty());
     }
 
+    // 프로젝트 정보 조회
+    public ProjectDto getById(Long projectId) {
+
+        if (projectRepository.findById(projectId).isEmpty()) {
+            throw new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다.");
+        }
+
+        Project p = projectRepository.findById(projectId).get();
+
+        if (p.getScope().name() != "PUBLIC") {
+            throw new GeneralException(Code.PROJECT_SCOPE_NOT_PUBLIC, "올바른 공개범위를 가진 프로젝트가 아닙니다.");
+        }
+
+        if (p.getUser().getRole().getKey() != "ROLE_USER") {
+            throw new GeneralException(Code.USER_ROLE_NOT_USER, "올바른 역할을 가진 유저가 아닙니다.");
+        }
+
+        return projectRepository.findById(projectId)
+            .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository, projectLikeRepository,
+                userRepository, getPrevStackers(project.getId(), false, true)))
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+    }
+
     // 프로젝트 좋아요 등록
     @Transactional
     public String likeProject(Long projectId) {
@@ -202,6 +225,34 @@ public class ProjectService {
         // while문을 이용하여 prevProjectId = 0(최초 프로젝트)이 될 때까지 스택 조회
         ArrayList<UserDto> stackers = new ArrayList<>();
 
+        if (search) {
+            Long prevProjectId = projectRepository.findById(projectId)
+                .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."))
+                .getPrevProjectId();
+
+            // while문을 이용하여 prevProjectId = 0(최초 프로젝트)이 될 때까지 스택 조회
+            while (prevProjectId != 0) {
+                Project project = projectRepository.findById(prevProjectId)
+                    .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+
+                if (project.getScope().equals(Scope.DELETED)) {
+                    stackers.add(UserDto.builder().project(ProjectDto.builder().scope(Scope.DELETED).build()).build());
+                } else {
+                    UserDto userDto = getSearchStackResponse(project.getId());
+                    stackers.add(userDto);
+                }
+                prevProjectId = project.getPrevProjectId();
+            }
+
+            return stackers;
+        }
+
+        // 현재 프로젝트 유저 정보 추가
+        if (current) {
+            UserDto userDto = getStackResponse(projectId);
+            stackers.add(userDto);
+        }
+
         Long prevProjectId = projectRepository.findById(projectId)
             .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."))
             .getPrevProjectId();
@@ -210,13 +261,12 @@ public class ProjectService {
             Project project = projectRepository.findById(prevProjectId)
                 .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
-            User user = project.getUser();
-
-            List<InstrumentDto> instruments = getInstrumentDtoFromProject(project);
-
-            UserDto userDto = UserDto.stackResponse(user, instruments);
-            stackers.add(userDto);
-
+            if (project.getScope().equals(Scope.DELETED)) {
+                stackers.add(UserDto.builder().project(ProjectDto.builder().scope(Scope.DELETED).build()).build());
+            } else {
+                UserDto userDto = getStackResponse(project.getId());
+                stackers.add(userDto);
+            }
             prevProjectId = project.getPrevProjectId();
         }
 
