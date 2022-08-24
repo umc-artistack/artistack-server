@@ -22,7 +22,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -143,15 +146,18 @@ public class ProjectController {
 
     /**
      *  스택 조회 API - 제이
-     *  [Get] /projects/{projectId}/prev
-     *  [Get] /projects/{projectId}/next
+     *  [Get] /projects/{projectId}/prev?current=true
+     *  [Get] /projects/{projectId}/next?current=true
      */
     @ApiOperation(value = "스택 조회")
     @ApiImplicitParams( value = {
         @ApiImplicitParam(name = "projectId", value = "현재 프로젝트 id", required = true, dataType = "long", paramType = "path"),
         @ApiImplicitParam(name = "sequence", value = "순서(prev or next)", required = true, dataType = "string", paramType = "path")})
     @GetMapping("/{projectId}/{sequence}")
-    public DataResponseDto<Object> getStack(@PathVariable Long projectId, @PathVariable String sequence) {
+    public DataResponseDto<Object> getStack(
+        @PageableDefault(size = 6) Pageable pageable,
+        @PathVariable Long projectId, @PathVariable String sequence,
+        @RequestParam(defaultValue = "true") Boolean current) {
         // validation
         // 1. query parameter가 next, prev를 제외한 다른 값이 들어올 경우
         if (!(sequence.equals("next") || sequence.equals("prev"))) {
@@ -159,9 +165,13 @@ public class ProjectController {
         }
 
         try {
-            List<UserDto> stackers = projectService.getStackers(projectId, sequence);
+            List<UserDto> stackers = projectService.getStackers(projectId, sequence, current);
 
-            return DataResponseDto.of(stackers);
+            final int start = (int) pageable.getOffset();
+            final int end = Math.min((start + pageable.getPageSize()), stackers.size());
+            final Page<UserDto> page = new PageImpl<>(stackers.subList(start, end), pageable, stackers.size());
+
+            return DataResponseDto.of(page);
 
         } catch (Exception e) {
             e.printStackTrace();

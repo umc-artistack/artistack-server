@@ -23,7 +23,6 @@ import java.util.ArrayList;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -55,9 +54,13 @@ public class ProjectService {
      * @param artistackId 조회할 유저의 artistackId (optional)
      * @return 조건에 맞는 프로젝트들 (profileResponse)
      */
-    public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId, Optional<Long> lastId) {
-        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null), lastId.orElse(null), Scope.PUBLIC)
-            .map(project -> ProjectDto.profileResponse(project, projectLikeRepository, userRepository));
+    public Page<ProjectDto> getByConditionWithPaging(Pageable pageable, Optional<String> artistackId,
+        Optional<Long> lastId) {
+        return projectRepository.getByConditionWithPaging(pageable, artistackId.orElse(null),
+                lastId.orElse(null), Scope.PUBLIC)
+            .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository, projectLikeRepository,
+                userRepository, getPrevStackers(project.getId(), false, true))
+            );
     }
 
     /**
@@ -91,8 +94,9 @@ public class ProjectService {
     // 프로젝트 정보 조회
     public ProjectDto getById(Long projectId) {
         return projectRepository.findById(projectId)
-                .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository, projectLikeRepository, userRepository))
-                .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+            .map(project -> ProjectDto.projectResponse(project, projectInstrumentRepository, projectLikeRepository,
+                userRepository))
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
     }
 
     // 프로젝트 좋아요 등록
@@ -144,7 +148,7 @@ public class ProjectService {
     public Page<UserDto> getProjectLikeUsersWithPaging(Pageable pageable, Long projectId) {
 
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
         Page<ProjectLike> projectLikes = projectLikeRepository.getByProjectWithPaging(pageable, project);
 
@@ -204,35 +208,53 @@ public class ProjectService {
     }
 
     // 스택 조회 - 다음 스택인지, 이전 스택인지 선택
-    public List<UserDto> getStackers(Long projectId, String sequence) {
+    public List<UserDto> getStackers(Long projectId, String sequence, Boolean current) {
         if (sequence.equals("prev")) {
-            return getPrevStackers(projectId);
+            return getPrevStackers(projectId, current, false);
         } else {
-            return getNextStackers(projectId);
+            return getNextStackers(projectId, current);
         }
     }
 
     // 이전에 스택을 쌓은 유저 목록(이전 스택) 조회
-    public List<UserDto> getPrevStackers(Long projectId) {
-        // while문을 이용하여 prevProjectId = 0(최초 프로젝트)이 될 때까지 스택 조회
+    public List<UserDto> getPrevStackers(Long projectId, Boolean current, Boolean search) {
         ArrayList<UserDto> stackers = new ArrayList<>();
+
+        if (search) {
+            Long prevProjectId = projectRepository.findById(projectId)
+                .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."))
+                .getPrevProjectId();
+
+            // while문을 이용하여 prevProjectId = 0(최초 프로젝트)이 될 때까지 스택 조회
+            while (prevProjectId != 0) {
+                Project project = projectRepository.findById(prevProjectId)
+                    .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+
+                UserDto userDto = getSearchStackResponse(project.getId());
+                stackers.add(userDto);
+
+                prevProjectId = project.getPrevProjectId();
+            }
+
+            return stackers;
+        }
+
+        // 현재 프로젝트 유저 정보 추가
+        if (current) {
+            UserDto userDto = getStackResponse(projectId);
+            stackers.add(userDto);
+        }
 
         Long prevProjectId = projectRepository.findById(projectId)
             .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."))
                 .getPrevProjectId();
 
-
+        // while문을 이용하여 prevProjectId = 0(최초 프로젝트)이 될 때까지 스택 조회
         while (prevProjectId != 0) {
             Project project = projectRepository.findById(prevProjectId)
                 .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
-            User user = project.getUser();
-
-            List<InstrumentDto> instruments = getInstrumentDtoFromProject(project);
-
-            ProjectDto projectDto = ProjectDto.stackResponse(project);
-
-            UserDto userDto = UserDto.stackResponse(user, instruments, projectDto);
+            UserDto userDto = getStackResponse(project.getId());
             stackers.add(userDto);
 
             prevProjectId = project.getPrevProjectId();
@@ -242,24 +264,20 @@ public class ProjectService {
     }
 
     // 현재 스택 위에 스택을 쌓은 유저 목록(다음 스택) 조회
-    public List<UserDto> getNextStackers(Long projectId) {
+    public List<UserDto> getNextStackers(Long projectId, Boolean current) {
         ArrayList<UserDto> stackers = new ArrayList<>();
+
+        if (current) {
+            UserDto userDto = getStackResponse(projectId);
+            stackers.add(userDto);
+        }
 
         // prevProjectId가 projectId인 자식 노드들 반환
         // 1. prevProjectId가 projectId인 프로젝트들을 찾아
         List<Project> projects = projectRepository.findAllByPrevProjectId(projectId);
 
         for (Project project : projects) {
-            Long userId = project.getUser().getId();
-
-            List<InstrumentDto> instruments = getInstrumentDtoFromProject(project);
-
-            User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(Code.USER_NOT_FOUND, "유저를 찾을 수 없습니다."));
-
-            ProjectDto projectDto = ProjectDto.stackResponse(project);
-
-            UserDto userDto = UserDto.stackResponse(user, instruments, projectDto);
+            UserDto userDto = getStackResponse(project.getId());
             stackers.add(userDto);
         }
 
@@ -279,4 +297,30 @@ public class ProjectService {
 
         return instruments;
     }
+
+    // 스택 조회 메서드에서 중복되는 부분 모듈화
+    public UserDto getStackResponse(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+
+        User user = project.getUser();
+
+        List<InstrumentDto> instruments = getInstrumentDtoFromProject(project);
+
+        ProjectDto projectDto = ProjectDto.stackResponse(project);
+
+        return UserDto.stackResponse(user, instruments, projectDto);
+    }
+
+    public UserDto getSearchStackResponse(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+            .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
+
+        User user = project.getUser();
+
+        List<InstrumentDto> instruments = getInstrumentDtoFromProject(project);
+
+        return UserDto.SearchStackResponse(user, instruments);
+    }
+
 }
