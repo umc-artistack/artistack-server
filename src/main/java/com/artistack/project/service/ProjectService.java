@@ -232,6 +232,7 @@ public class ProjectService {
     public List<UserDto> getPrevStackers(Long projectId, Boolean current, Boolean search) {
         ArrayList<UserDto> stackers = new ArrayList<>();
 
+        // 프로젝트 조회 API에서 사용
         if (search) {
             Long prevProjectId = projectRepository.findById(projectId)
                 .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."))
@@ -242,12 +243,11 @@ public class ProjectService {
                 Project project = projectRepository.findById(prevProjectId)
                     .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
-                if (project.getScope().equals(Scope.DELETED)) {
-                    stackers.add(UserDto.builder().project(ProjectDto.builder().scope(Scope.DELETED).build()).build());
-                } else {
+                if (!project.getScope().equals(Scope.DELETED)) {
                     UserDto userDto = getSearchStackResponse(project.getId());
                     stackers.add(userDto);
                 }
+
                 prevProjectId = project.getPrevProjectId();
             }
 
@@ -260,6 +260,7 @@ public class ProjectService {
             stackers.add(userDto);
         }
 
+        // 스택 조회 API에서 사용
         Long prevProjectId = projectRepository.findById(projectId)
             .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."))
                 .getPrevProjectId();
@@ -269,9 +270,7 @@ public class ProjectService {
             Project project = projectRepository.findById(prevProjectId)
                 .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
-            if (project.getScope().equals(Scope.DELETED)) {
-                stackers.add(UserDto.builder().project(ProjectDto.builder().scope(Scope.DELETED).build()).build());
-            } else {
+            if (!project.getScope().equals(Scope.DELETED)) {
                 UserDto userDto = getStackResponse(project.getId());
                 stackers.add(userDto);
             }
