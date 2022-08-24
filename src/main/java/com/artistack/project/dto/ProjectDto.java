@@ -9,7 +9,6 @@ import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.ProjectInstrumentRepository;
 import com.artistack.project.constant.Scope;
 import com.artistack.project.domain.Project;
-
 import com.artistack.project.domain.ProjectLike;
 import com.artistack.project.repository.ProjectLikeRepository;
 import com.artistack.user.domain.User;

@@ -93,7 +93,9 @@ public class ProjectService {
 
     // 프로젝트 정보 조회
     public ProjectDto getById(Long projectId) {
-        if(projectRepository.findById(projectId).isEmpty()) {
+
+        if (projectRepository.findById(projectId).isEmpty()) {
+
             throw new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다.");
         }
 
@@ -244,8 +246,12 @@ public class ProjectService {
                 Project project = projectRepository.findById(prevProjectId)
                     .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
-                UserDto userDto = getSearchStackResponse(project.getId());
-                stackers.add(userDto);
+                if (project.getScope().equals(Scope.DELETED)) {
+                    stackers.add(UserDto.builder().project(ProjectDto.builder().scope(Scope.DELETED).build()).build());
+                } else {
+                    UserDto userDto = getSearchStackResponse(project.getId());
+                    stackers.add(userDto);
+                }
 
                 prevProjectId = project.getPrevProjectId();
             }
@@ -268,8 +274,12 @@ public class ProjectService {
             Project project = projectRepository.findById(prevProjectId)
                 .orElseThrow(() -> new GeneralException(Code.PROJECT_NOT_FOUND, "프로젝트를 찾을 수 없습니다."));
 
-            UserDto userDto = getStackResponse(project.getId());
-            stackers.add(userDto);
+            if (project.getScope().equals(Scope.DELETED)) {
+                stackers.add(UserDto.builder().project(ProjectDto.builder().scope(Scope.DELETED).build()).build());
+            } else {
+                UserDto userDto = getStackResponse(project.getId());
+                stackers.add(userDto);
+            }
 
             prevProjectId = project.getPrevProjectId();
         }
