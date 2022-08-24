@@ -31,6 +31,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import static org.springframework.util.ObjectUtils.isEmpty;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProjectService {
 
     private final S3UploaderService s3UploaderService;
+    private final UserService userService;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final InstrumentRepository instrumentRepository;

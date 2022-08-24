@@ -7,10 +7,12 @@ import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.ProjectInstrumentRepository;
 import com.artistack.project.constant.Scope;
 import com.artistack.project.domain.Project;
+
 import com.artistack.project.repository.ProjectLikeRepository;
 import com.artistack.user.domain.User;
 import com.artistack.user.dto.UserDto;
 import com.artistack.user.repository.UserRepository;
+
 import com.artistack.util.SecurityUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
@@ -20,6 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
