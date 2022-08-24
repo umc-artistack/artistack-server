@@ -79,9 +79,7 @@ public class UserDto {
             .build();
     }
 
-
     public static UserDto previewResponse(User user) {
-
         return UserDto.builder()
             .artistackId(user.getArtistackId())
             .nickname(user.getNickname())

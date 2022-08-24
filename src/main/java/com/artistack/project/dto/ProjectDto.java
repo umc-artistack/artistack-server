@@ -1,6 +1,5 @@
 package com.artistack.project.dto;
 
-
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 import com.artistack.base.GeneralException;
@@ -10,12 +9,15 @@ import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.ProjectInstrumentRepository;
 import com.artistack.project.constant.Scope;
 import com.artistack.project.domain.Project;
+
 import com.artistack.project.domain.ProjectLike;
 import com.artistack.project.repository.ProjectLikeRepository;
 import com.artistack.user.domain.User;
 import com.artistack.user.dto.UserDto;
 import com.artistack.user.repository.UserRepository;
+
 import com.artistack.user.service.UserService;
+
 import com.artistack.util.SecurityUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
@@ -81,7 +83,6 @@ public class ProjectDto {
         Boolean isLiked = !isEmpty(projectLikeRepository) && !projectLikeRepository.findByUserAndProject(
             userRepository.findById(SecurityUtil.getUserId()).orElse(null), project).isEmpty();
 
-
         return ProjectDto.builder()
             .id(project.getId())
             .title(project.getTitle())
@@ -101,7 +102,6 @@ public class ProjectDto {
         ProjectLikeRepository projectLikeRepository, UserRepository userRepository) {
         return projectResponse(project, projectInstrumentRepository, projectLikeRepository, userRepository, null);
     }
-
 
     public static ProjectDto projectResponse(Project project, ProjectInstrumentRepository projectInstrumentRepository,
         ProjectLikeRepository projectLikeRepository, UserRepository userRepository, List<UserDto> prevStackers) {
