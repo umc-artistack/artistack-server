@@ -259,7 +259,7 @@ class OAuthControllerTest extends BaseControllerTest {
     }
 
     JwtDto reissue(HashMap<String, Object> body, int code) throws Exception {
-        MvcResult res = mockMvc.perform(get("/oauth/reissue")
+        MvcResult res = mockMvc.perform(post("/oauth/reissue")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(body))
             )

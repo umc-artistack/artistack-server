@@ -57,7 +57,7 @@ public class OAuthController {
     }
 
     @ApiOperation(value = "JWT 만료 시 재발급")
-    @GetMapping("/reissue")
+    @PostMapping("/reissue")
     public DataResponseDto<Object> reissueJwt(@RequestBody JwtDto jwtDto) {
         return DataResponseDto.of(jwtService.reissueJwt(jwtDto));
     }

@@ -1,5 +1,6 @@
 package com.artistack.user.dto;
 
+
 import static com.artistack.user.constant.UserConstraint.ARTISTACK_ID_MAX_LENGTH;
 import static com.artistack.user.constant.UserConstraint.ARTISTACK_ID_MIN_LENGTH;
 import static com.artistack.user.constant.UserConstraint.DESCRIPTION_MAX_LENGTH;
@@ -9,10 +10,15 @@ import static org.apache.logging.log4j.util.Strings.isBlank;
 
 import com.artistack.base.GeneralException;
 import com.artistack.base.constant.Code;
+import com.artistack.instrument.domain.Instrument;
 import com.artistack.instrument.domain.UserInstrument;
 import com.artistack.instrument.dto.InstrumentDto;
 import com.artistack.instrument.repository.UserInstrumentRepository;
 import com.artistack.oauth.constant.ProviderType;
+
+import com.artistack.project.domain.ProjectLike;
+
+import com.artistack.project.dto.ProjectDto;
 import com.artistack.user.constant.Role;
 import com.artistack.user.domain.User;
 import com.artistack.user.repository.UserRepository;
@@ -32,12 +38,13 @@ import lombok.extern.slf4j.Slf4j;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
 
-    private String id;
+    private Long id;
     private String artistackId;
     private String nickname;
     private String description;
     private String profileImgUrl;
     private List<InstrumentDto> instruments;
+    private ProjectDto project;
     private ProviderType providerType;
     private Role role;
 
@@ -72,7 +79,24 @@ public class UserDto {
             .build();
     }
 
-    public static UserDto stackResponse(User user, List<InstrumentDto> instruments) {
+    public static UserDto previewResponse(User user) {
+        return UserDto.builder()
+            .artistackId(user.getArtistackId())
+            .nickname(user.getNickname())
+            .profileImgUrl(user.getProfileImgUrl())
+            .build();
+    }
+
+    public static UserDto stackResponse(User user, List<InstrumentDto> instruments, ProjectDto project) {
+        return UserDto.builder()
+            .nickname(user.getNickname())
+            .profileImgUrl(user.getProfileImgUrl())
+            .instruments(instruments)
+            .project(project)
+            .build();
+    }
+
+    public static UserDto SearchStackResponse(User user, List<InstrumentDto> instruments) {
         return UserDto.builder()
             .nickname(user.getNickname())
             .profileImgUrl(user.getProfileImgUrl())
@@ -80,16 +104,24 @@ public class UserDto {
             .build();
     }
 
+    public static UserDto projectLikeUsersResponse(ProjectLike projectLike) {
+        return UserDto.builder()
+                .artistackId(projectLike.getUser().getArtistackId())
+                .nickname(projectLike.getUser().getNickname())
+                .profileImgUrl(projectLike.getUser().getProfileImgUrl())
+                .build();
+    }
+
     public User toEntity(UserRepository userRepository) {
         this.userRepository = userRepository;
 
-        return User.builder().
-            artistackId(validateArtistackId(artistackId)).
-            nickname(validateNickname(nickname)).
-            description(validateDescription(description)).
-            profileImgUrl(profileImgUrl)
-            .providerType(providerType).
-            build();
+        return User.builder()
+            .artistackId(validateArtistackId(artistackId))
+            .nickname(validateNickname(nickname))
+            .description(validateDescription(description))
+            .profileImgUrl(profileImgUrl)
+            .providerType(providerType)
+            .build();
     }
 
     public User updateEntity(User user, UserRepository userRepository) {

@@ -69,4 +69,6 @@ HELP.md
 
 aws.yml
 
+application.properties
+
 application-local.properties
