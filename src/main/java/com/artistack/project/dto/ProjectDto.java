@@ -98,7 +98,6 @@ public class ProjectDto {
         return projectResponse(project, projectInstrumentRepository, projectLikeRepository, userRepository, null);
     }
 
-
     public static ProjectDto projectResponse(Project project, ProjectInstrumentRepository projectInstrumentRepository,
         ProjectLikeRepository projectLikeRepository, UserRepository userRepository, List<UserDto> prevStackers) {
 

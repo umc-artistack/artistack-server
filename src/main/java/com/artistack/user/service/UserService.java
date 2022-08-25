@@ -6,6 +6,8 @@ import com.artistack.base.constant.Code;
 import com.artistack.instrument.repository.UserInstrumentRepository;
 import com.artistack.jwt.repository.JwtRepository;
 import com.artistack.oauth.service.OAuthService;
+import com.artistack.project.repository.ProjectRepository;
+import com.artistack.project.service.ProjectService;
 import com.artistack.user.domain.User;
 import com.artistack.user.dto.UserDto;
 import com.artistack.user.repository.UserRepository;
@@ -22,9 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final OAuthService oAuthService;
+    private final ProjectService projectService;
     private final UserRepository userRepository;
     private final JwtRepository jwtRepository;
     private final UserInstrumentRepository userInstrumentRepository;
+    private final ProjectRepository projectRepository;
 
     private User getUser(Long id) {
         return userRepository.findById(id)
@@ -74,6 +78,8 @@ public class UserService {
      */
     public Boolean delete(Long userId) {
         User user = getUser(userId);
+
+        projectRepository.findAllByUser(user).forEach(project -> projectService.deleteMyProject(project.getId()));
 
         switch (user.getProviderType()) {
             case KAKAO:
