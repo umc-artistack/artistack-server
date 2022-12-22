@@ -2,7 +2,6 @@ package com.artistack.project.repository;
 
 import com.artistack.project.constant.Scope;
 import com.artistack.project.domain.Project;
-import com.artistack.user.domain.User;
 import java.util.List;
 import java.util.Optional;
 
