@@ -7,11 +7,8 @@
 <div align="center">
 
 [![GitHub Open Issues](https://img.shields.io/github/issues-raw/umc-artistack/artistack-server?color=green)](https://github.com/umc-artistack/artistack-server/issues)
-
 [![GitHub Closed Issues](https://img.shields.io/github/issues-closed-raw/umc-artistack/artistack-server?color=red)](https://github.com/umc-artistack/artistack-server/issues?q=is%3Aissue+is%3Aclosed)
-
 [![GitHub Open PR](https://img.shields.io/github/issues-pr-raw/umc-artistack/artistack-server?color=green)](https://github.com/umc-artistack/artistack-server/pulls)
-
 [![GitHub Closed PR](https://img.shields.io/github/issues-pr-closed-raw/umc-artistack/artistack-server?color=red)](https://github.com/umc-artistack/artistack-server/pulls?q=is%3Apr+is%3Aclosed)
 
 </div>
